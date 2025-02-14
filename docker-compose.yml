@@ -1,16 +1,19 @@
 services:
   client:
+    container_name: coursecritic-client
     build:
       context: .
       dockerfile: Dockerfile.react
     ports:
       - "80:80"
     depends_on:
-      - server
+      server:
+        condition: service_healthy
     networks:
       - app-network
 
   server:
+    container_name: coursecritic-server
     build:
       context: .
       dockerfile: Dockerfile.node
@@ -22,14 +25,19 @@ services:
       - DB_PASSWORD=admin_password
       - DB_NAME=coursecritic
       - DB_PORT=3306
+      - NODE_ENV=production
     networks:
       - app-network
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8001/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
 networks:
   app-network:
-    driver: bridge
+    name: coursecritic_network
 
 
 

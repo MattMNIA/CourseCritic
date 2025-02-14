@@ -1,0 +1,70 @@
+:root {
+  --bs-primary: #003366;
+  --bs-primary-rgb: 0, 51, 102;
+  
+  --bs-secondary: #ff8c00;
+  --bs-secondary-rgb: 255, 140, 0;
+  
+  --bs-success: #38a169;
+  --bs-success-rgb: 56, 161, 105;
+  
+  --bs-info: #0ea5e9;
+  --bs-info-rgb: 14, 165, 233;
+  
+  --bs-warning: #fbbf24;
+  --bs-warning-rgb: 251, 191, 36;
+  
+  --bs-danger: #e53e3e;
+  --bs-danger-rgb: 229, 62, 62;
+  
+  --bs-light: #f4f5f7;
+  --bs-light-rgb: 244, 245, 247;
+  
+  --bs-dark: #1a202c;
+  --bs-dark-rgb: 26, 32, 44;
+}
+
+/* Override Bootstrap component colors */
+.btn-primary {
+  --bs-btn-bg: var(--bs-primary);
+  --bs-btn-border-color: var(--bs-primary);
+  --bs-btn-hover-bg: #004d99;
+  --bs-btn-hover-border-color: #004d99;
+  --bs-btn-color: #fff;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--bs-primary-dark);
+  --bs-btn-hover-border-color: var(--bs-primary-dark);
+  --bs-btn-active-bg: var(--bs-primary-dark);
+  --bs-btn-active-border-color: var(--bs-primary-dark);
+}
+
+.bg-primary {
+  background-color: var(--bs-primary) !important;
+}
+
+/* Navbar styling */
+.navbar {
+  --bs-navbar-padding-y: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.navbar .nav-link {
+  font-weight: 500;
+  margin: 0 0.25rem;
+  padding: 0.5rem 0.75rem !important;
+  transition: color 0.2s ease;
+}
+
+.navbar .nav-link:hover {
+  color: var(--bs-primary-dark) !important;
+}
+
+/* Active link styling */
+.navbar .nav-link.active {
+  color: var(--bs-primary) !important;
+  font-weight: 600;
+}
+
+.text-primary {
+  color: var(--bs-primary) !important;
+}

@@ -1,13 +1,23 @@
-FROM node:18
+FROM node:18-slim
 
 WORKDIR /app
 
-COPY package*.json ./
-COPY server ./server
+# Install build essentials and curl
+RUN apt-get update && \
+    apt-get install -y python3 make g++ curl && \
+    rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update && apt-get install -y curl
+# Install dependencies in a separate layer
+COPY package*.json ./
 RUN npm install
+RUN npm rebuild bcrypt --build-from-source
+
+# Copy application
+COPY server ./server
 
 EXPOSE 8001
 
-CMD ["node", "server/index.js"]
+HEALTHCHECK --interval=30s --timeout=3s \
+    CMD curl -f http://localhost:8001/api/health || exit 1
+
+CMD ["node", "server/server.js"]

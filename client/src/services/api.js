@@ -1,8 +1,15 @@
 import axios from 'axios';
 
+const baseURL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? 'http://localhost:8001/api'
+  : 'http://localhost:8001/api';
+
 export const api = axios.create({
-  baseURL: 'http://157.230.188.42:8001/api',  // Updated to use VM's IP
+  baseURL,
   headers: {
     'Content-Type': 'application/json',
-  },
+  }
 });
+
+// Log the current API URL for debugging
+console.log('API URL:', baseURL);

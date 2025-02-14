@@ -12,7 +12,7 @@ import { api } from './api';
  * @property {string} test_coursescol - Additional course info
  */
 
-export const courseService = {
+const courseService = {
   /**
    * Get all courses
    * @returns {Promise<Course[]>}
@@ -62,3 +62,5 @@ export const courseService = {
     await api.delete(`/courses/${id}`);
   }
 };
+
+export default courseService;
