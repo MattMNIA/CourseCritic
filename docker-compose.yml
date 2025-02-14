@@ -1,12 +1,35 @@
-version: '3.8'
-
 services:
-  app:
-    build: .
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile.react
     ports:
-      - "3000:3000"
+      - "80:80"
+    depends_on:
+      - server
+    networks:
+      - app-network
+
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile.node
+    ports:
+      - "8001:8001"
     environment:
-      - NODE_ENV=production
-    volumes:
-      - .:/app
-      - /app/node_modules
+      - DB_HOST=157.230.188.42
+      - DB_USER=admin
+      - DB_PASSWORD=admin_password
+      - DB_NAME=coursecritic
+      - DB_PORT=3306
+    networks:
+      - app-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+networks:
+  app-network:
+    driver: bridge
+
+
+

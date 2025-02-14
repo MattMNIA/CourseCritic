@@ -1,0 +1,19 @@
+FROM node:18-alpine
+
+WORKDIR /app/server
+
+COPY server/package*.json ./
+RUN npm install
+
+COPY server/ ./
+
+ENV PORT=8001
+ENV DB_HOST=157.230.188.42
+ENV DB_USER=admin
+ENV DB_PASSWORD=admin_password
+ENV DB_NAME=coursecritic
+ENV DB_PORT=3306
+
+EXPOSE 8001
+
+CMD ["node", "server.js"]
