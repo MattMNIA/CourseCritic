@@ -1,10 +1,12 @@
 const express = require('express');
 const mysql = require('mysql2');
+var cors = require("cors");
+
 
 // Next initialize the application
 const app = express();
 app.use(express.json()); // Add JSON parsing middleware
-
+app.use(cors())
 // routing path
 app.get('/', (req, res) => {
   res.send('Hello World!');
