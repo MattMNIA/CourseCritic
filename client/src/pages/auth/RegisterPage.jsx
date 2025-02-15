@@ -41,6 +41,12 @@ const RegisterPage = () => {
       return;
     }
 
+    if (!formData.university) {
+      setError('Please select a university');
+      setLoading(false);
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       setLoading(false);
@@ -58,7 +64,7 @@ const RegisterPage = () => {
         email: formData.email,
         password: formData.password,
         name: formData.name,
-        university: formData.university
+        university: parseInt(formData.university) // Ensure university is sent as a number
       };
 
       const response = await userService.register(userData);
