@@ -1,7 +1,7 @@
 const express = require('express');
 const mysql = require('mysql2');
 var cors = require("cors");
-
+const bcrypt = require('bcrypt');
 
 // Next initialize the application
 const app = express();
@@ -12,12 +12,18 @@ app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-// Add health check endpoint
-app.get('/api/health', (req, res) => {
-  res.status(200).send('healthy');
+// Add better health check endpoint
+app.get('/api/health', async (req, res) => {
+  try {
+    // Test database connection
+    await connection.promise().query('SELECT 1');
+    res.status(200).send('healthy');
+  } catch (error) {
+    console.error('Health check failed:', error);
+    res.status(500).send('unhealthy');
+  }
 });
 
-// Start the server
 // Create MySQL connection
 const connection = mysql.createConnection({
   host: process.env.DB_HOST,   // Use VM IP from .env or docker-compose
@@ -27,19 +33,33 @@ const connection = mysql.createConnection({
   port: process.env.DB_PORT || 3306,
 });
 
-// Connect to MySQL
-connection.connect(error => {
-  if (error) {
-    console.error('Error connecting to MySQL: ' + error.stack);
-    return;
+// Update server startup
+const startServer = async () => {
+  try {
+    // Wait for database connection
+    await new Promise((resolve, reject) => {
+      connection.connect(error => {
+        if (error) {
+          console.error('Error connecting to MySQL:', error.stack);
+          reject(error);
+          return;
+        }
+        console.log('Connected to MySQL as id', connection.threadId);
+        resolve();
+      });
+    });
+
+    // Start server after successful database connection
+    app.listen(8001, () => {
+      console.log('Server started on port 8001');
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
   }
-  console.log('Connected to MySQL as id ' + connection.threadId);
-  
-  // Start Express server after successful DB connection
-  app.listen(8001, () => {
-    console.log('Server started on port 8001');
-  });
-});
+};
+
+startServer();
 
 // GET all courses
 app.get('/api/courses', (req, res) => {
@@ -140,6 +160,11 @@ app.delete('/api/courses/:id', (req, res) => {
 app.post('/api/users/register', async (req, res) => {
   try {
     const { email, password, name, university } = req.body;
+    
+    if (!password) {
+      return res.status(400).json({ error: 'Password is required' });
+    }
+
     console.log('Registration attempt:', { email, name, university });
 
     // Check if user exists
@@ -204,5 +229,32 @@ app.post('/api/users/register', async (req, res) => {
   } catch (error) {
     console.error('Server error:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Update hash password function with proper error handling
+const hashPassword = async (password) => {
+  if (!password) {
+    throw new Error('Password is required');
+  }
+  try {
+    const saltRounds = 10;
+    return await bcrypt.hash(password.toString(), saltRounds);
+  } catch (error) {
+    console.error('Password hashing error:', error);
+    throw new Error('Failed to hash password');
+  }
+};
+
+// Add universities endpoint - place this with other endpoints
+app.get('/api/universities', async (req, res) => {
+  console.log('GET /api/universities - Fetching all universities');
+  try {
+    const [results] = await connection.promise().query('SELECT * FROM universities');
+    console.log(`Found ${results.length} universities`);
+    res.json(results);
+  } catch (error) {
+    console.error('Error fetching universities:', error);
+    res.status(500).json({ error: 'Failed to fetch universities' });
   }
 });

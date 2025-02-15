@@ -1,19 +1,20 @@
-FROM node:18-alpine
+FROM node:18-slim
 
-WORKDIR /app/server
+WORKDIR /app
 
-COPY server/package*.json ./
+# Install curl for health checks
+RUN apt-get update && \
+    apt-get install -y curl && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY /server/package*.json ./
 RUN npm install
 
-COPY server/ ./
+COPY server ./server
 
 ENV PORT=8001
-ENV DB_HOST=157.230.188.42
-ENV DB_USER=admin
-ENV DB_PASSWORD=admin_password
-ENV DB_NAME=coursecritic
-ENV DB_PORT=3306
 
 EXPOSE 8001
 
-CMD ["node", "server.js"]
+# Add a startup script to wait for MySQL
+CMD ["node", "server/server.js"]

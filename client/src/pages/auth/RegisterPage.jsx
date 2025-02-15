@@ -67,10 +67,15 @@ const RegisterPage = () => {
         university: parseInt(formData.university) // Ensure university is sent as a number
       };
 
+      console.log('Sending registration data:', { ...userData, password: '[REDACTED]' });
+      
       const response = await userService.register(userData);
+      console.log('Registration response:', response);
+      
       userService.setCurrentUser(response);
       navigate('/');
     } catch (err) {
+      console.error('Registration error:', err);
       setError(err.response?.data?.error || 'Registration failed');
     } finally {
       setLoading(false);

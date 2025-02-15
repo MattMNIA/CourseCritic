@@ -43,14 +43,14 @@ const Home = () => {
                     <Row className="align-items-center">
                         <Col md={8}>
                             <h1 className="display-4 fw-bold mb-3">Make Informed Course Decisions</h1>
-                            <p className="lead mb-4">
+                            <p className="lead mb-4 text-white" style={{ opacity: 0.9 }}>
                                 Join thousands of students sharing their course experiences and finding the right classes for their academic journey.
                             </p>
                             <Link to="/auth/register">
-                                <Button size="lg" variant="light" className="me-3">Get Started</Button>
+                                <Button size="lg" variant="light" className="me-3 fw-semibold text-primary">Get Started</Button>
                             </Link>
                             <Link to="/courses/search">
-                                <Button size="lg" variant="outline-light">Browse Courses</Button>
+                                <Button size="lg" variant="outline-light" className="fw-semibold border-2">Browse Courses</Button>
                             </Link>
                         </Col>
                     </Row>
