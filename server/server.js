@@ -232,6 +232,42 @@ app.post('/api/users/register', async (req, res) => {
   }
 });
 
+// Add login endpoint
+app.post('/api/users/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Find user by email
+    connection.query(
+      'SELECT id, email, name, password_hash, role, university_id FROM users WHERE email = ?',
+      [email],
+      async (error, results) => {
+        if (error) {
+          return res.status(500).json({ error: 'Database error' });
+        }
+
+        if (results.length === 0) {
+          return res.status(401).json({ error: 'Invalid email or password' });
+        }
+
+        const user = results[0];
+        const validPassword = await bcrypt.compare(password, user.password_hash);
+
+        if (!validPassword) {
+          return res.status(401).json({ error: 'Invalid email or password' });
+        }
+
+        // Don't send password hash back
+        const { password_hash, ...userWithoutPassword } = user;
+        res.json(userWithoutPassword);
+      }
+    );
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ error: 'Login failed' });
+  }
+});
+
 // Update hash password function with proper error handling
 const hashPassword = async (password) => {
   if (!password) {
@@ -248,9 +284,22 @@ const hashPassword = async (password) => {
 
 // Add universities endpoint - place this with other endpoints
 app.get('/api/universities', async (req, res) => {
-  console.log('GET /api/universities - Fetching all universities');
+  console.log('GET /api/universities - Fetching all universities with stats');
   try {
-    const [results] = await connection.promise().query('SELECT * FROM universities');
+    const [results] = await connection.promise().query(`
+      SELECT 
+        u.id,
+        u.name,
+        COUNT(DISTINCT c.id) as course_count,
+        COUNT(DISTINCT r.id) as review_count,
+        COUNT(DISTINCT r.user_id) as student_count
+      FROM universities u
+      LEFT JOIN courses c ON u.id = c.university_id
+      LEFT JOIN reviews r ON c.id = r.course_id
+      GROUP BY u.id, u.name
+      ORDER BY u.name ASC
+    `);
+    
     console.log(`Found ${results.length} universities`);
     res.json(results);
   } catch (error) {

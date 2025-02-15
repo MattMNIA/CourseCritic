@@ -7,7 +7,17 @@ const universityService = {
       return response.data;
     } catch (error) {
       console.error('Failed to fetch universities:', error);
-      throw new Error(error.response?.data?.error || 'Failed to fetch universities');
+      throw error;
+    }
+  },
+  
+  getUniversityStats: async (id) => {
+    try {
+      const response = await api.get(`/universities/${id}/stats`);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to fetch university stats:', error);
+      throw error;
     }
   }
 };

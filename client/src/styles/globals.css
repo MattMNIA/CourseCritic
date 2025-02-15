@@ -114,3 +114,50 @@ h1, h2, h3, h4, h5, h6 {
         font-size: 2.5rem;
     }
 }
+
+/* Action Cards */
+.action-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 1rem;
+}
+
+.action-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+.icon-wrapper {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bs-primary-rgb, 0, 51, 102, 0.1);
+    border-radius: 50%;
+    margin-bottom: 1.5rem;
+}
+
+/* Stats Section */
+.stats-section {
+    background-color: var(--bs-light);
+}
+
+.stat-card {
+    transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+/* Responsive Typography */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .hero-text {
+        font-size: 1.1rem;
+    }
+}

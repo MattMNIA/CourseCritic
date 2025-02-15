@@ -1,4 +1,4 @@
-import React, { useEffect, Suspense } from 'react';
+import React, { useEffect, Suspense, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { Navbar, Container, Nav } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -6,6 +6,7 @@ import './styles/bootstrap-custom.css';
 import './styles/globals.css';
 import './styles/layout.css';
 import Home from './pages/home';
+import userService from './services/userService';
 
 // Lazy load components
 const LoginPage = React.lazy(() => import('./pages/auth/LoginPage'));
@@ -20,6 +21,13 @@ const CreateCoursePage = React.lazy(() => import('./pages/admin/CreateCoursePage
 const EditCoursePage = React.lazy(() => import('./pages/admin/EditCoursePage'));
 
 function App() {
+    const [currentUser, setCurrentUser] = useState(userService.getCurrentUser());
+
+    const handleLogout = () => {
+        userService.logout();
+        setCurrentUser(null);
+    };
+
     useEffect(() => {
         // Force light mode
         document.documentElement.setAttribute('data-theme', 'light');
@@ -40,10 +48,32 @@ function App() {
                                 <Nav.Link as={Link} to="/universities" className="text-primary">Universities</Nav.Link>
                             </Nav>
                             <Nav>
-                                {/* Right-aligned items */}
-                                <Nav.Link as={Link} to="/account/settings" className="text-primary">My Account</Nav.Link>
-                                <Nav.Link as={Link} to="/auth/login" className="text-primary">Login</Nav.Link>
-                                <Nav.Link as={Link} to="/auth/register" className="btn btn-primary ms-2 text-white">Sign Up</Nav.Link>
+                                {currentUser ? (
+                                    <>
+                                        <Nav.Link as={Link} to="/account/settings" className="text-primary">
+                                            My Account
+                                        </Nav.Link>
+                                        <Nav.Link 
+                                            onClick={handleLogout} 
+                                            className="btn btn-outline-primary ms-2"
+                                        >
+                                            Log Out
+                                        </Nav.Link>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Nav.Link as={Link} to="/auth/login" className="text-primary">
+                                            Login
+                                        </Nav.Link>
+                                        <Nav.Link 
+                                            as={Link} 
+                                            to="/auth/register" 
+                                            className="btn btn-primary ms-2 text-white"
+                                        >
+                                            Sign Up
+                                        </Nav.Link>
+                                    </>
+                                )}
                             </Nav>
                         </Navbar.Collapse>
                     </Container>

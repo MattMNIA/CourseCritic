@@ -1,8 +1,6 @@
 CREATE TABLE coursecritic.universities (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    location VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    name VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE coursecritic.users (

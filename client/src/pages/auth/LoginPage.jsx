@@ -1,22 +1,38 @@
 import { useState } from 'react';
-import { Form, Button, Container, Card } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import { Form, Button, Container, Card, Alert } from 'react-bootstrap';
+import { Link, useNavigate } from 'react-router-dom';
+import userService from '../../services/userService';
 
 const LoginPage = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Implement login logic
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await userService.login(formData);
+      userService.setCurrentUser(response);
+      navigate('/');
+    } catch (err) {
+      setError(err?.response?.data?.error || 'Login failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '80vh' }}>
       <Card className="p-4" style={{ maxWidth: '400px', width: '100%' }}>
         <h2 className="text-center mb-4">Login to CourseCritic</h2>
+        {error && <Alert variant="danger">{error}</Alert>}
         <Form onSubmit={handleSubmit}>
           <Form.Group className="mb-3">
             <Form.Label>Email address</Form.Label>
@@ -38,8 +54,8 @@ const LoginPage = () => {
             />
           </Form.Group>
 
-          <Button variant="primary" type="submit" className="w-100">
-            Login
+          <Button variant="primary" type="submit" className="w-100" disabled={loading}>
+            {loading ? 'Logging in...' : 'Login'}
           </Button>
           
           <div className="text-center mt-3">

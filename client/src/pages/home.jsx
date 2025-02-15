@@ -1,7 +1,7 @@
 import React from 'react';
 import { Container, Row, Col, Card, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { FaSearch, FaStar, FaUniversity, FaUserGraduate } from 'react-icons/fa';
+import { FaSearch, FaStar, FaUniversity } from 'react-icons/fa';
 
 const Home = () => {
     const stats = {
@@ -36,40 +36,27 @@ const Home = () => {
     ];
 
     return (
-        <div className="home-page">
-            {/* Hero Section */}
-            <div className="bg-primary text-white py-5 mb-5">
-                <Container>
-                    <Row className="align-items-center">
-                        <Col md={8}>
-                            <h1 className="display-4 fw-bold mb-3">Make Informed Course Decisions</h1>
-                            <p className="lead mb-4 text-white" style={{ opacity: 0.9 }}>
-                                Join thousands of students sharing their course experiences and finding the right classes for their academic journey.
-                            </p>
-                            <Link to="/auth/register">
-                                <Button size="lg" variant="light" className="me-3 fw-semibold text-primary">Get Started</Button>
-                            </Link>
-                            <Link to="/courses/search">
-                                <Button size="lg" variant="outline-light" className="fw-semibold border-2">Browse Courses</Button>
-                            </Link>
-                        </Col>
-                    </Row>
-                </Container>
-            </div>
-
+        <div className="home-page py-5">
             {/* Quick Actions */}
             <Container className="mb-5">
-                <h2 className="text-center mb-4">What would you like to do?</h2>
-                <Row>
+                <h2 className="text-center h1 fw-bold mb-5">What would you like to do?</h2>
+                <Row className="g-4">
                     {quickActions.map((action, index) => (
-                        <Col key={index} md={4} className="mb-4">
-                            <Card className="h-100 text-center p-4 hover-shadow">
-                                <Card.Body>
-                                    {action.icon}
-                                    <h3 className="h4 mb-3">{action.title}</h3>
+                        <Col key={index} md={4}>
+                            <Card className="action-card h-100 border-0 shadow-sm">
+                                <Card.Body className="p-4 text-center">
+                                    <div className="icon-wrapper mb-3">
+                                        {React.cloneElement(action.icon, {
+                                            size: 40,
+                                            className: "text-primary"
+                                        })}
+                                    </div>
+                                    <h3 className="h4 mb-3 fw-bold">{action.title}</h3>
                                     <p className="text-muted mb-4">{action.description}</p>
                                     <Link to={action.link}>
-                                        <Button variant="primary">{action.buttonText}</Button>
+                                        <Button variant="primary" className="fw-semibold px-4">
+                                            {action.buttonText}
+                                        </Button>
                                     </Link>
                                 </Card.Body>
                             </Card>
@@ -79,25 +66,24 @@ const Home = () => {
             </Container>
 
             {/* Statistics */}
-            <div className="bg-light py-5">
-                <Container>
-                    <Row className="text-center">
-                        <Col md={3} sm={6} className="mb-4">
-                            <h2 className="display-4 text-primary fw-bold">{stats.courses}</h2>
-                            <p className="text-muted mb-0">Courses Reviewed</p>
-                        </Col>
-                        <Col md={3} sm={6} className="mb-4">
-                            <h2 className="display-4 text-primary fw-bold">{stats.reviews}</h2>
-                            <p className="text-muted mb-0">Student Reviews</p>
-                        </Col>
-                        <Col md={3} sm={6} className="mb-4">
-                            <h2 className="display-4 text-primary fw-bold">{stats.universities}</h2>
-                            <p className="text-muted mb-0">Universities</p>
-                        </Col>
-                        <Col md={3} sm={6} className="mb-4">
-                            <h2 className="display-4 text-primary fw-bold">{stats.students}</h2>
-                            <p className="text-muted mb-0">Active Students</p>
-                        </Col>
+            <div className="stats-section py-5 bg-light">
+                <Container className="py-4">
+                    <Row className="text-center g-4">
+                        {Object.entries({
+                            'Courses Reviewed': stats.courses,
+                            'Student Reviews': stats.reviews,
+                            'Universities': stats.universities,
+                            'Active Students': stats.students
+                        }).map(([label, value]) => (
+                            <Col key={label} md={3} sm={6}>
+                                <div className="stat-card p-4 bg-white rounded-3 shadow-sm h-100">
+                                    <h2 className="display-4 text-primary fw-bold mb-2">
+                                        {value}
+                                    </h2>
+                                    <p className="text-muted mb-0 fw-medium">{label}</p>
+                                </div>
+                            </Col>
+                        ))}
                     </Row>
                 </Container>
             </div>
