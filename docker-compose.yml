@@ -11,6 +11,8 @@ services:
         condition: service_healthy
     networks:
       - app-network
+    environment:
+      - REACT_APP_API_URL=${REACT_APP_API_URL}
 
   server:
     container_name: coursecritic-server
@@ -20,12 +22,13 @@ services:
     ports:
       - "8001:8001"
     environment:
-      - DB_HOST=157.230.188.42
-      - DB_USER=admin
-      - DB_PASSWORD=admin_password
-      - DB_NAME=coursecritic
-      - DB_PORT=3306
+      - DB_HOST=${DB_HOST}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=${DB_PORT:-3306}
       - NODE_ENV=production
+      - API_URL=${REACT_APP_API_URL}
     networks:
       - app-network
     healthcheck:
