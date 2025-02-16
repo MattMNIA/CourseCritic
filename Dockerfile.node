@@ -2,12 +2,12 @@ FROM node:18-slim
 
 WORKDIR /app
 
-# Install curl for health checks
+# Install wget for health checks
 RUN apt-get update && \
-    apt-get install -y curl && \
+    apt-get install -y wget && \
     rm -rf /var/lib/apt/lists/*
 
-COPY /server/package*.json ./
+COPY server/package*.json ./
 RUN npm install
 
 COPY server ./server
@@ -16,5 +16,4 @@ ENV PORT=8001
 
 EXPOSE 8001
 
-# Add a startup script to wait for MySQL
 CMD ["node", "server/server.js"]

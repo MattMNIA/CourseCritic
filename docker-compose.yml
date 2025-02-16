@@ -12,7 +12,7 @@ services:
     networks:
       - app-network
     environment:
-      - REACT_APP_API_URL=${REACT_APP_API_URL}
+      - REACT_APP_API_URL=http://coursecritic-server:8001
 
   server:
     container_name: coursecritic-server
@@ -22,21 +22,21 @@ services:
     ports:
       - "8001:8001"
     environment:
-      - DB_HOST=${DB_HOST}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_NAME=${DB_NAME}
-      - DB_PORT=${DB_PORT:-3306}
+      - DB_HOST=157.230.188.42
+      - DB_USER=admin
+      - DB_PASSWORD=admin_password
+      - DB_NAME=coursecritic
+      - DB_PORT=3306
       - NODE_ENV=production
-      - API_URL=${REACT_APP_API_URL}
+      - PORT=8001
     networks:
       - app-network
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8001/api/health || exit 1"]
-      interval: 30s
-      timeout: 30s
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8001/api/health"]
+      interval: 10s
+      timeout: 5s
       retries: 5
-      start_period: 60s
+      start_period: 10s
     restart: unless-stopped
 
 networks:

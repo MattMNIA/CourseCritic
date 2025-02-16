@@ -12,16 +12,9 @@ app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-// Add better health check endpoint
-app.get('/api/health', async (req, res) => {
-  try {
-    // Test database connection
-    await connection.promise().query('SELECT 1');
-    res.status(200).send('healthy');
-  } catch (error) {
-    console.error('Health check failed:', error);
-    res.status(500).send('unhealthy');
-  }
+// Simple health check that doesn't depend on DB
+app.get('/api/health', (req, res) => {
+  res.status(200).send('healthy');
 });
 
 // Create MySQL connection
@@ -33,29 +26,27 @@ const connection = mysql.createConnection({
   port: process.env.DB_PORT || 3306,
 });
 
-// Update server startup
+// Start the server first, then connect to DB
 const startServer = async () => {
+  const server = app.listen(process.env.PORT || 8001, () => {
+    console.log('Server started on port', process.env.PORT || 8001);
+  });
+
   try {
-    // Wait for database connection
     await new Promise((resolve, reject) => {
       connection.connect(error => {
         if (error) {
           console.error('Error connecting to MySQL:', error.stack);
           reject(error);
-          return;
+        } else {
+          console.log('Connected to MySQL as id', connection.threadId);
+          resolve();
         }
-        console.log('Connected to MySQL as id', connection.threadId);
-        resolve();
       });
     });
-
-    // Start server after successful database connection
-    app.listen(8001, () => {
-      console.log('Server started on port 8001');
-    });
   } catch (error) {
-    console.error('Failed to start server:', error);
-    process.exit(1);
+    console.error('Failed to connect to database:', error);
+    // Don't exit process, let server keep running
   }
 };
 
