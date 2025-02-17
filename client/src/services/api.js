@@ -9,15 +9,15 @@ console.log('Environment check:', {
 });
 
 // Remove string interpolation and /api suffix since it's causing issues
-const baseUrl = '/api';
+const url_base = process.env.REACT_APP_API_URL || 'http://localhost:8001/api';
 const cleanUrl = (url) => url.replace(/['"]/g, '');
 
-console.log('Using API URL:', baseURL);
-console.log('Using Clean API URL:', cleanUrl(baseURL));
+console.log('Using API URL:', url_base);
+console.log('Using Clean API URL:', cleanUrl(url_base));
 
 
 export const api = axios.create({
-  baseURL: baseUrl,
+  baseURL: url_base,
   headers: {
     'Content-Type': 'application/json'
   }
