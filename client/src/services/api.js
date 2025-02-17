@@ -1,10 +1,12 @@
 import axios from 'axios';
 
-// Clean up any quotes from the URL
-const cleanUrl = (url) => url?.replace(/['"]/g, '') || 'http://localhost:8001';
-const baseURL = cleanUrl(process.env.REACT_APP_API_URL);
+// Remove string interpolation and /api suffix since it's causing issues
+const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:8001/api';
+const cleanUrl = (url) => url.replace(/['"]/g, '');
 
 console.log('Using API URL:', baseURL);
+console.log('Using Clean API URL:', cleanUrl(baseURL));
+
 
 export const api = axios.create({
   baseURL: baseURL,
