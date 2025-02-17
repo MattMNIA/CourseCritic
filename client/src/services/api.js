@@ -9,7 +9,7 @@ console.log('Environment check:', {
 });
 
 // Remove string interpolation and /api suffix since it's causing issues
-const baseUrl = '/api'
+const baseUrl = '/api';
 const cleanUrl = (url) => url.replace(/['"]/g, '');
 
 console.log('Using API URL:', baseURL);
