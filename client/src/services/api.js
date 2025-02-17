@@ -1,5 +1,11 @@
 import axios from 'axios';
 
+// Debug log to verify environment variable
+console.log('Environment check:', {
+  raw: process.env.REACT_APP_API_URL,
+  NODE_ENV: process.env.NODE_ENV
+});
+
 // Remove string interpolation and /api suffix since it's causing issues
 const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:8001/api';
 const cleanUrl = (url) => url.replace(/['"]/g, '');
