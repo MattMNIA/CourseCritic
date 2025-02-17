@@ -9,9 +9,9 @@ dotenv.config({ path: path.resolve(__dirname, '../.env') });
 export default defineConfig({
   plugins: [react()],
   define: {
-    'process.env': {
-      REACT_APP_API_URL: JSON.stringify(process.env.REACT_APP_API_URL)
-    }
+    'process.env.REACT_APP_API_URL': process.env.REACT_APP_API_URL
+      ? `"${process.env.REACT_APP_API_URL}"`
+      : undefined
   },
   root: path.resolve(__dirname),
   build: {
