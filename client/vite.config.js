@@ -4,6 +4,9 @@ import path from 'path';
 
 export default defineConfig({
   plugins: [react()],
+  define: {
+    'process.env.REACT_APP_API_URL': JSON.stringify(process.env.REACT_APP_API_URL)
+  },
   root: path.resolve(__dirname),
   build: {
     outDir: 'dist',

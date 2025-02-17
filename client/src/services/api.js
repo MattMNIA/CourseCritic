@@ -1,10 +1,10 @@
 import axios from 'axios';
 
-// Debug log to see the value
-console.log('API URL:', import.meta.env.VITE_API_URL);
+const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8001';
+console.log('Using API URL:', apiUrl);
 
 export const api = axios.create({
-  baseURL: `${import.meta.env.VITE_API_URL}/api`,
+  baseURL: `${apiUrl}/api`,
   headers: {
     'Content-Type': 'application/json'
   }
