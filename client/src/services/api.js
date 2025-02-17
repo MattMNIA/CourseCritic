@@ -1,10 +1,11 @@
 import axios from 'axios';
 
-const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8001/api';
-console.log('Using API URL:', apiUrl);
+// Remove string interpolation and /api suffix since it's causing issues
+const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:8001/api';
+console.log('Using API URL:', baseURL);
 
 export const api = axios.create({
-  baseURL: `${apiUrl}`,
+  baseURL: baseURL,
   headers: {
     'Content-Type': 'application/json'
   }
