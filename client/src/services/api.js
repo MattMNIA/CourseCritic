@@ -3,7 +3,9 @@ import axios from 'axios';
 // Debug log to verify environment variable
 console.log('Environment check:', {
   raw: process.env.REACT_APP_API_URL,
-  NODE_ENV: process.env.NODE_ENV
+  NODE_ENV: process.env.NODE_ENV,
+  DB_HOST: process.env.DB_HOST,
+  VITE_API_URL, process.env.VITE_API_URL
 });
 
 // Remove string interpolation and /api suffix since it's causing issues
