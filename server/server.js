@@ -1,12 +1,23 @@
 const express = require('express');
 const mysql = require('mysql2');
-var cors = require("cors");
+const cors = require("cors");
 const bcrypt = require('bcrypt');
 
 // Next initialize the application
 const app = express();
+
+// Update CORS configuration
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(express.json()); // Add JSON parsing middleware
-app.use(cors())
+
+// Add OPTIONS handling for preflight requests
+app.options('*', cors());
+
 // routing path
 app.get('/', (req, res) => {
   res.send('Hello World!');
