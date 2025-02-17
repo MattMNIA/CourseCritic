@@ -12,10 +12,18 @@ const UniversitiesPage = () => {
     const fetchUniversities = async () => {
       try {
         const data = await universityService.getAllUniversities();
+        console.log('Universities data:', data); // Debug log
+        
+        // Validate data is an array
+        if (!Array.isArray(data)) {
+          console.error('Universities data is not an array:', data);
+          throw new Error('Invalid data format received');
+        }
+        
         setUniversities(data);
       } catch (err) {
+        console.error('Error in UniversitiesPage:', err);
         setError('Failed to load universities');
-        console.error('Error fetching universities:', err);
       } finally {
         setLoading(false);
       }

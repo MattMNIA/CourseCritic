@@ -291,10 +291,19 @@ app.get('/api/universities', async (req, res) => {
       ORDER BY u.name ASC
     `);
     
-    console.log(`Found ${results.length} universities`);
+    // Ensure we're sending an array
+    if (!Array.isArray(results)) {
+      console.error('Query results is not an array:', results);
+      return res.status(500).json({ error: 'Invalid data format' });
+    }
+
+    console.log(`Found ${results.length} universities:`, results);
     res.json(results);
   } catch (error) {
     console.error('Error fetching universities:', error);
-    res.status(500).json({ error: 'Failed to fetch universities' });
+    res.status(500).json({ 
+      error: 'Failed to fetch universities',
+      details: error.message 
+    });
   }
 });

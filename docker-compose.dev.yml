@@ -1,36 +1,37 @@
 services:
   client:
-    container_name: coursecritic-client
+    container_name: coursecritic-client-dev
     build:
       context: .
-      dockerfile: Dockerfile.react
+      dockerfile: Dockerfile.react.dev
     ports:
-      - "8080:80"
-    depends_on:
-      server:
-        condition: service_healthy
+      - "5173:5173"
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - REACT_APP_API_URL=http://localhost:8001
     networks:
       - app-network
-    environment:
-      - REACT_APP_API_URL=${REACT_APP_API_URL}
 
   server:
-    container_name: coursecritic-server
+    container_name: coursecritic-server-dev
     build:
       context: .
-      dockerfile: Dockerfile.node
+      dockerfile: Dockerfile.node.dev
     ports:
       - "8001:8001"
-    env_file:
-      - .env
+    volumes:
+      - ./server:/app/server
+      - /app/node_modules
     environment:
       - DB_HOST=${DB_HOST}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME}
       - DB_PORT=${DB_PORT:-3306}
-      - NODE_ENV=production
-      - PORT=8001
+      - NODE_ENV=development
     networks:
       - app-network
     healthcheck:
@@ -38,12 +39,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 10s
     restart: unless-stopped
 
 networks:
   app-network:
-    name: coursecritic_network
-
-
-
+    name: coursecritic_network_dev

@@ -1,0 +1,17 @@
+FROM node:18-slim
+
+WORKDIR /app
+
+# Install nodemon for development and wget for health checks
+RUN apt-get update && \
+    apt-get install -y wget && \
+    npm install -g nodemon && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY server/package*.json ./
+RUN npm install
+
+EXPOSE 8001
+
+# Use nodemon instead of node for hot reloading
+CMD ["nodemon", "--watch", "server", "server/server.js"]

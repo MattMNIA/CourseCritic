@@ -4,9 +4,18 @@ const universityService = {
   getAllUniversities: async () => {
     try {
       const response = await api.get('/universities');
-      return response.data;
+      
+      // Add validation
+      if (!response.data) {
+        throw new Error('No data received from server');
+      }
+      
+      // Ensure we always return an array
+      return Array.isArray(response.data) ? response.data : [];
+      
     } catch (error) {
-      console.error('Failed to fetch universities:', error);
+      console.error('Universities service error:', error);
+      console.error('Response:', error.response);
       throw error;
     }
   },
