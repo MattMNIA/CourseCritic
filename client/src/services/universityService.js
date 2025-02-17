@@ -3,6 +3,8 @@ import { api } from './api';
 const universityService = {
   getAllUniversities: async () => {
     try {
+      console.log('ENV varible:', process.env.REACT_APP_API_URL)
+      console.log('API Base URL:', api.defaults.baseURL);
       const response = await api.get('/universities');
       
       // Add validation
