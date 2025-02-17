@@ -1,16 +1,45 @@
 import { useState } from 'react';
-import { Form, Button, Card, Container, Row, Col } from 'react-bootstrap';
+import { Form, Button, Card, Container, Row, Col, Alert } from 'react-bootstrap';
+import CourseSearch from '../../components/CourseSearch';
+import ProfessorSearch from '../../components/ProfessorSearch';
+import UniversitySearch from '../../components/UniversitySearch';
+import CourseCard from '../../components/CourseCard';
+import courseService from '../../services/courseService';
 
 const SearchCoursesPage = () => {
   const [searchParams, setSearchParams] = useState({
-    university: '',
-    keyword: '',
-    professor: '',
+    universityId: '',
+    courseId: '',
+    professorId: ''
   });
+  const [results, setResults] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const handleSearch = (e) => {
+  const handleSearch = async (e) => {
     e.preventDefault();
-    // Implement search functionality
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      console.log("Searching for courses")
+      const searchResults = await courseService.searchCourses(searchParams);
+      setResults(searchResults);
+    } catch (err) {
+      setError('Failed to fetch courses. Please try again.');
+      console.error('Search error:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleClear = () => {
+    setSearchParams({
+      universityId: '',
+      courseId: '',
+      professorId: ''
+    });
+    setResults([]);
   };
 
   return (
@@ -22,43 +51,69 @@ const SearchCoursesPage = () => {
             <Col md={4}>
               <Form.Group className="mb-3">
                 <Form.Label>University</Form.Label>
-                <Form.Select
-                  value={searchParams.university}
-                  onChange={(e) => setSearchParams({...searchParams, university: e.target.value})}
-                >
-                  <option value="">Select University</option>
-                  <option value="iowa-state">Iowa State University</option>
-                  {/* Add more universities */}
-                </Form.Select>
+                <UniversitySearch
+                  onSelect={(university) => setSearchParams({
+                    ...searchParams,
+                    universityId: university?.id || ''
+                  })}
+                />
               </Form.Group>
             </Col>
             <Col md={4}>
               <Form.Group className="mb-3">
-                <Form.Label>Course Name or Number</Form.Label>
-                <Form.Control
-                  type="text"
-                  placeholder="e.g. CS 101 or Introduction to Programming"
-                  value={searchParams.keyword}
-                  onChange={(e) => setSearchParams({...searchParams, keyword: e.target.value})}
+                <Form.Label>Course</Form.Label>
+                <CourseSearch
+                  onSelect={(course) => setSearchParams({
+                    ...searchParams,
+                    courseId: course?.id || ''
+                  })}
                 />
               </Form.Group>
             </Col>
             <Col md={4}>
               <Form.Group className="mb-3">
                 <Form.Label>Professor</Form.Label>
-                <Form.Control
-                  type="text"
-                  placeholder="Professor name"
-                  value={searchParams.professor}
-                  onChange={(e) => setSearchParams({...searchParams, professor: e.target.value})}
+                <ProfessorSearch
+                  onSelect={(professor) => setSearchParams({
+                    ...searchParams,
+                    professorId: professor?.id || ''
+                  })}
                 />
               </Form.Group>
             </Col>
           </Row>
-          <Button type="submit" variant="primary">Search Courses</Button>
+          <div className="d-flex gap-2">
+            <Button type="submit" variant="primary" onClick={handleSearch}>
+              Search Courses
+            </Button>
+            <Button variant="outline-secondary" onClick={handleClear}>
+              Clear All
+            </Button>
+          </div>
         </Form>
       </Card>
-      {/* Results section will go here */}
+
+      {/* Results section */}
+      {isLoading ? (
+        <div className="text-center mt-4">Loading...</div>
+      ) : error ? (
+        <Alert variant="danger" className="mt-4">{error}</Alert>
+      ) : results.length > 0 ? (
+        <div className="mt-4">
+          <h2>Search Results ({results.length} courses found)</h2>
+          <Row xs={1} md={2} lg={3} className="g-4 mt-2">
+            {results.map(course => (
+              <Col key={course.id}>
+                <CourseCard course={course} />
+              </Col>
+            ))}
+          </Row>
+        </div>
+      ) : searchParams.universityId && (
+        <Alert variant="info" className="mt-4">
+          No courses found matching your criteria
+        </Alert>
+      )}
     </Container>
   );
 };

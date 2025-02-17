@@ -60,6 +60,52 @@ const courseService = {
    */
   deleteCourse: async (id) => {
     await api.delete(`/courses/${id}`);
+  },
+
+  /**
+   * Get courses by university ID
+   * @param {number} universityId - University ID
+   * @returns {Promise<Course[]>}
+   */
+  getCoursesByUniversity: async (universityId) => {
+    try {
+      const response = await api.get(`/courses/university/${universityId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to fetch university courses:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Search courses
+   * @param {Object} params - Search parameters
+   * @param {number} [params.universityId] - University ID
+   * @param {number} [params.courseId] - Course ID
+   * @param {number} [params.professorId] - Professor ID
+   * @returns {Promise<Course[]>}
+   */
+  searchCourses: async ({ universityId, courseId, professorId }) => {
+    try {
+      let url = '/search/courses';
+      const params = new URLSearchParams();
+      
+      if (universityId) params.append('university_id', universityId);
+      if (courseId) params.append('course_id', courseId);
+      if (professorId) params.append('professor_id', professorId);
+      
+      // Only add the query string if we have parameters
+      const queryString = params.toString();
+      if (queryString) {
+        url += '?' + queryString;
+      }
+      console.log('Searching courses at URL:', url);
+      const response = await api.get(url);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to search courses:', error);
+      throw error;
+    }
   }
 };
 

@@ -3,14 +3,13 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 import dotenv from 'dotenv';
 
-// Load env file based on mode
-process.env = { ...process.env, ...dotenv.config({ path: '../.env' }).parsed };
+// Load the .env file from the project root (one level up from client)
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 export default defineConfig({
   plugins: [react()],
   define: {
-    // This is the key change that makes env variables available
-    'process.env': JSON.stringify(process.env)
+    'process.env.REACT_APP_API_URL': JSON.stringify(process.env.REACT_APP_API_URL)
   },
   root: path.resolve(__dirname),
   build: {

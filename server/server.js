@@ -30,11 +30,11 @@ app.get('/api/health', (req, res) => {
 
 // Create MySQL connection
 const connection = mysql.createConnection({
-  host: process.env.DB_HOST,   // Use VM IP from .env or docker-compose
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT || 3306,
+  host: "157.230.188.42",   // Use VM IP from .env or docker-compose
+  user: "admin",
+  password: "admin_password",
+  database: "coursecritic",
+  port: 3306,
 });
 
 // Start the server first, then connect to DB
@@ -92,6 +92,76 @@ app.get('/api/courses/:id', (req, res) => {
       res.json(results[0]);
     }
   );
+});
+
+// GET courses by university ID
+app.get('/api/courses/university/:universityId', async (req, res) => {
+  console.log(`GET /api/courses/university/${req.params.universityId} - Fetching courses by university`);
+  try {
+    const [results] = await connection.promise().query(
+      'SELECT * FROM courses WHERE university_id = ?',
+      [req.params.universityId]
+    );
+    
+    console.log(`Found ${results.length} courses for university ${req.params.universityId}`);
+    res.json(results);
+  } catch (error) {
+    console.error('Error fetching university courses:', error);
+    res.status(500).json({ error: 'Failed to fetch courses' });
+  }
+});
+
+// GET search courses
+app.get('/api/search/courses', async (req, res) => {
+  console.log('GET /api/search/courses - Searching courses with params:', req.query);
+  try {
+    // const { universityId, courseId, professorId } = req.query;
+    const universityId = req.query["university_id"];
+    const courseId = req.query["course_id"];
+    const professorId = req.query["professor_id"];
+    let query = `
+      SELECT 
+        c.*,
+        AVG(r.difficulty) as difficulty,
+        AVG(r.workload) as workload,
+        AVG(r.usefulness) as usefulness,
+        COUNT(DISTINCT r.id) as review_count
+      FROM courses c
+      LEFT JOIN reviews r ON c.id = r.course_id
+    `;
+
+    const whereConditions = [];
+    const params = [];
+
+    if (universityId) {
+      whereConditions.push('c.university_id = ?');
+      params.push(universityId);
+    }
+
+    if (courseId) {
+      whereConditions.push('c.id = ?');
+      params.push(courseId);
+    }
+
+    if (professorId) {
+      whereConditions.push('EXISTS (SELECT 1 FROM reviews r2 WHERE r2.course_id = c.id AND r2.professor_id = ?)');
+      params.push(professorId);
+    }
+
+    if (whereConditions.length > 0) {
+      query += ' WHERE ' + whereConditions.join(' AND ');
+    }
+
+    query += ' GROUP BY c.id';
+
+    const [results] = await connection.promise().query(query, params);
+    
+    console.log(`Found ${results.length} courses matching criteria`);
+    res.json(results);
+  } catch (error) {
+    console.error('Error searching courses:', error);
+    res.status(500).json({ error: 'Failed to search courses' });
+  }
 });
 
 // POST new course
@@ -316,5 +386,96 @@ app.get('/api/universities', async (req, res) => {
       error: 'Failed to fetch universities',
       details: error.message 
     });
+  }
+});
+
+// GET all professors
+app.get('/api/professors', async (req, res) => {
+  console.log('GET /api/professors - Fetching all professors');
+  try {
+    const [results] = await connection.promise().query(
+      'SELECT DISTINCT professor as name, id FROM courses WHERE professor IS NOT NULL'
+    );
+    
+    console.log(`Found ${results.length} professors`);
+    res.json(results);
+  } catch (error) {
+    console.error('Error fetching professors:', error);
+    res.status(500).json({ error: 'Failed to fetch professors' });
+  }
+});
+
+// GET professors by university
+app.get('/api/professors/university/:universityId', async (req, res) => {
+  console.log(`GET /api/professors/university/${req.params.universityId} - Fetching professors by university`);
+  try {
+    const [results] = await connection.promise().query(
+      'SELECT id, name FROM professors WHERE university_id = ?',
+      [req.params.universityId]
+    );
+    
+    console.log(`Found ${results.length} professors for university ${req.params.universityId}`);
+    res.json(results);
+  } catch (error) {
+    console.error('Error fetching university professors:', error);
+    res.status(500).json({ error: 'Failed to fetch professors' });
+  }
+});
+
+// POST new professor
+app.post('/api/professors', async (req, res) => {
+  console.log('POST /api/professors - Creating new professor:', req.body);
+  try {
+    const professor = {
+      name: req.body.name,
+      university_id: req.body.universityId
+    };
+
+    const [result] = await connection.promise().query(
+      'INSERT INTO professors SET ?',
+      professor
+    );
+    
+    console.log(`Created professor with ID ${result.insertId}`);
+    res.status(201).json({ 
+      id: result.insertId, 
+      ...professor 
+    });
+  } catch (error) {
+    console.error('Error creating professor:', error);
+    res.status(500).json({ error: 'Failed to create professor' });
+  }
+});
+
+// POST new review
+app.post('/api/reviews', async (req, res) => {
+  console.log('POST /api/reviews - Creating new review:', req.body);
+  try {
+    let course_id = req.body.courseId;
+    if (!req.body.courseId || !Number.isInteger(parseInt(req.body.courseId))) {
+      course_id = req.body.courseId.id
+    }
+    const review = {
+      course_id: course_id,
+      user_id: req.body.userId,
+      professor_id: req.body.professorId,
+      difficulty: req.body.difficulty,
+      workload: req.body.hoursPerWeek,
+      usefulness: req.body.usefulness,
+      course_comments: req.body.courseComments,
+      general_comments: req.body.comments,
+      created_at: new Date()
+    };
+
+    const [result] = await connection.promise().query(
+      'INSERT INTO reviews SET ?',
+      review
+    );
+
+    console.log(`Created review with ID ${result.insertId}`);
+    res.status(201).json({ id: result.insertId, ...review });
+  } catch (error) {
+    console.error('Error creating review:', error);
+    res.status(500).json({ error: 'Failed to create review' });
   }
 });
