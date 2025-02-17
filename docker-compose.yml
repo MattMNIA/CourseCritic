@@ -14,7 +14,6 @@ services:
     environment:
       - REACT_APP_API_URL=${REACT_APP_API_URL}
       - VITE_API_URL=${VITE_API_URL}
-      - REACT_APP_API_URL: "${REACT_APP_API_URL}"
     env_file:
       - .env
 
@@ -35,13 +34,6 @@ services:
       - DB_PORT=${DB_PORT:-3306}
       - NODE_ENV=production
       - PORT=8001
-      - DB_HOST: "${DB_HOST}"
-      - DB_USER: "${DB_USER}"
-      - DB_PASSWORD: "${DB_PASSWORD}"
-      - DB_NAME: "${DB_NAME}"
-      - DB_PORT: "${DB_PORT:-3306}"
-      - NODE_ENV: production
-      - PORT: 8001
     networks:
       - app-network
     healthcheck:
