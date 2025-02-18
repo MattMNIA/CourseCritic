@@ -2,13 +2,20 @@ import { api } from './api';
 
 const reviewService = {
   submitReview: async (reviewData) => {
-    try {
-      const response = await api.post('/reviews', reviewData);
-      return response.data;
-    } catch (error) {
-      console.error('Failed to submit review:', error);
-      throw error;
+    const response = await fetch('/api/review', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(reviewData)
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to submit review');
     }
+
+    return await response.json();
   }
 };
 

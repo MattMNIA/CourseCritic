@@ -9,7 +9,8 @@ const AutocompleteSearch = ({
   filterItems,
   renderItem,
   getDisplayValue,
-  label
+  label,
+  disabled
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [items, setItems] = useState([]);
@@ -78,6 +79,7 @@ const AutocompleteSearch = ({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             isInvalid={!!error}
+            disabled={disabled}
           />
           <Form.Control.Feedback type="invalid">{error}</Form.Control.Feedback>
           

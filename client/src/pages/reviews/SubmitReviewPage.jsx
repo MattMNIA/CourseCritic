@@ -23,29 +23,6 @@ const SubmitReviewPage = () => {
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
   const { currentUniversity } = useUniversity();
-  const [universityName, setUniversityName] = useState('');
-
-  useEffect(() => {
-    const updateUniversityName = async () => {
-      try {
-        if (currentUniversity) {
-          setUniversityName(currentUniversity.name);
-        } else {
-          const user = userService.getCurrentUser();
-          if (user?.university_id) {
-            const response = await fetch(`/api/universities/${user.university_id}`);
-            if (!response.ok) throw new Error('Failed to fetch university');
-            const data = await response.json();
-            setUniversityName(data.name);
-          }
-        }
-      } catch (error) {
-        console.error('Error updating university name:', error);
-      }
-    };
-
-    updateUniversityName();
-  }, [currentUniversity]); // Only depend on currentUniversity changes
 
   const totalSteps = 7;  // Increased from 5 to 7
   const progress = (step / totalSteps) * 100;
@@ -296,13 +273,13 @@ const SubmitReviewPage = () => {
 
   return (
     <Container className="py-4">
-      {universityName && (
+      {!currentUniversity ? (
+        <Alert variant="warning" className="mb-4">
+          Please select a university from the dropdown menu in the navigation bar to submit a review.
+        </Alert>
+      ) : (
         <Alert variant="info" className="mb-4">
-          <Alert.Heading as="h5">Writing review for {universityName}</Alert.Heading>
-          <p className="mb-0">
-            You are writing a review for a course at {universityName}. 
-            To review a course from a different university, please select the university from the dropdown menu in the navigation bar.
-          </p>
+          <Alert.Heading as="h5">Writing review for {currentUniversity.name}</Alert.Heading>
         </Alert>
       )}
       

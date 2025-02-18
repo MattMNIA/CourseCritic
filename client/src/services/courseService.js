@@ -69,12 +69,35 @@ const courseService = {
    */
   getCoursesByUniversity: async (universityId) => {
     try {
-      const response = await api.get(`/courses/university/${universityId}`);
-      return response.data;
+      const response = await fetch(`/api/courses/university/${universityId}`);
+      if (!response.ok) throw new Error('Failed to fetch courses');
+      return await response.json();
     } catch (error) {
-      console.error('Failed to fetch university courses:', error);
-      throw error;
+      console.error('Error fetching courses:', error);
+      return [];
     }
+  },
+
+  /**
+   * Get course by ID
+   * @param {number} courseId - Course ID
+   * @returns {Promise<Course>}
+   */
+  getCourse: async (courseId) => {
+    const response = await fetch(`/api/course/${courseId}`);
+    if (!response.ok) throw new Error('Failed to fetch course');
+    return await response.json();
+  },
+
+  /**
+   * Get course reviews by course ID
+   * @param {number} courseId - Course ID
+   * @returns {Promise<Object[]>}
+   */
+  getCourseReviews: async (courseId) => {
+    const response = await fetch(`/api/course/${courseId}/reviews`);
+    if (!response.ok) throw new Error('Failed to fetch course reviews');
+    return await response.json();
   },
 
   /**
@@ -87,24 +110,24 @@ const courseService = {
    */
   searchCourses: async ({ universityId, courseId, professorId }) => {
     try {
-      let url = '/search/courses';
+      let url = '/api/courses/search';
       const params = new URLSearchParams();
       
       if (universityId) params.append('university_id', universityId);
       if (courseId) params.append('course_id', courseId);
       if (professorId) params.append('professor_id', professorId);
       
-      // Only add the query string if we have parameters
       const queryString = params.toString();
       if (queryString) {
         url += '?' + queryString;
       }
-      console.log('Searching courses at URL:', url);
-      const response = await api.get(url);
-      return response.data;
+
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Failed to fetch courses');
+      return await response.json();
     } catch (error) {
       console.error('Failed to search courses:', error);
-      throw error;
+      return [];
     }
   }
 };

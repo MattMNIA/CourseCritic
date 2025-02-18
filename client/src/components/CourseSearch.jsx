@@ -1,16 +1,17 @@
 import { useState, useEffect } from 'react';
-import { Form, ListGroup, Button } from 'react-bootstrap';
+import { Form, ListGroup } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import AutocompleteSearch from './AutocompleteSearch';
-import userService from '../services/userService';
 import courseService from '../services/courseService';
+import { useUniversity } from '../contexts/UniversityContext';
 
 const CourseSearch = ({ onSelect, error }) => {
+  const navigate = useNavigate();
+  const { currentUniversity } = useUniversity();
+
   const fetchCourses = async () => {
-    const user = userService.getCurrentUser();
-    if (user?.university_id) {
-      return courseService.getCoursesByUniversity(user.university_id);
-    }
-    return [];
+    if (!currentUniversity?.id) return [];
+    return courseService.searchCourses({ universityId: currentUniversity.id });
   };
 
   const filterCourses = (courses, searchTerm) => {
@@ -21,24 +22,39 @@ const CourseSearch = ({ onSelect, error }) => {
   };
 
   const renderCourse = (course) => (
-    <>
+    <ListGroup.Item
+      key={course.id}
+      action
+      onClick={() => handleCourseClick(course)}
+      className="d-flex justify-content-between align-items-center"
+    >
       <div className="fw-bold">{course.course_code}</div>
       <small>{course.course_name}</small>
-    </>
+    </ListGroup.Item>
   );
 
   const getDisplayValue = (course) => `${course.course_code} - ${course.course_name}`;
 
+  const handleCourseClick = (course) => {
+    if (onSelect) {
+      onSelect(course);
+    } else {
+      navigate(`/courses/${course.id}`);
+    }
+  };
+
   return (
     <AutocompleteSearch
+      key={currentUniversity?.id || 'no-university'}
       onSelect={onSelect}
       error={error}
-      placeholder="Search for a course..."
+      placeholder={currentUniversity ? "Search for a course..." : "Select a university first"}
       fetchItems={fetchCourses}
       filterItems={filterCourses}
       renderItem={renderCourse}
       getDisplayValue={getDisplayValue}
       label="Course"
+      disabled={!currentUniversity}
     />
   );
 };

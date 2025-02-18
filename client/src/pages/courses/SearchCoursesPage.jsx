@@ -2,13 +2,13 @@ import { useState } from 'react';
 import { Form, Button, Card, Container, Row, Col, Alert } from 'react-bootstrap';
 import CourseSearch from '../../components/CourseSearch';
 import ProfessorSearch from '../../components/ProfessorSearch';
-import UniversitySearch from '../../components/UniversitySearch';
 import CourseCard from '../../components/CourseCard';
 import courseService from '../../services/courseService';
+import { useUniversity } from '../../contexts/UniversityContext';
 
 const SearchCoursesPage = () => {
+  const { currentUniversity } = useUniversity();
   const [searchParams, setSearchParams] = useState({
-    universityId: '',
     courseId: '',
     professorId: ''
   });
@@ -18,12 +18,19 @@ const SearchCoursesPage = () => {
 
   const handleSearch = async (e) => {
     e.preventDefault();
+    if (!currentUniversity) {
+      setError('Please select a university first');
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
     try {
-      console.log("Searching for courses")
-      const searchResults = await courseService.searchCourses(searchParams);
+      const searchResults = await courseService.searchCourses({
+        ...searchParams,
+        universityId: currentUniversity.id
+      });
       setResults(searchResults);
     } catch (err) {
       setError('Failed to fetch courses. Please try again.');
@@ -35,12 +42,21 @@ const SearchCoursesPage = () => {
 
   const handleClear = () => {
     setSearchParams({
-      universityId: '',
       courseId: '',
       professorId: ''
     });
     setResults([]);
   };
+
+  if (!currentUniversity) {
+    return (
+      <Container>
+        <Alert variant="warning">
+          Please select a university from the navigation bar to search for courses.
+        </Alert>
+      </Container>
+    );
+  }
 
   return (
     <Container>
@@ -48,18 +64,7 @@ const SearchCoursesPage = () => {
       <Card className="p-4 mb-4">
         <Form onSubmit={handleSearch}>
           <Row>
-            <Col md={4}>
-              <Form.Group className="mb-3">
-                <Form.Label>University</Form.Label>
-                <UniversitySearch
-                  onSelect={(university) => setSearchParams({
-                    ...searchParams,
-                    universityId: university?.id || ''
-                  })}
-                />
-              </Form.Group>
-            </Col>
-            <Col md={4}>
+            <Col md={6}>
               <Form.Group className="mb-3">
                 <Form.Label>Course</Form.Label>
                 <CourseSearch
@@ -70,7 +75,7 @@ const SearchCoursesPage = () => {
                 />
               </Form.Group>
             </Col>
-            <Col md={4}>
+            <Col md={6}>
               <Form.Group className="mb-3">
                 <Form.Label>Professor</Form.Label>
                 <ProfessorSearch

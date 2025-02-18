@@ -9,6 +9,7 @@ import Home from './pages/home';
 import userService from './services/userService';
 import UniversitySelector from './components/UniversitySelector';
 import { UniversityProvider } from './contexts/UniversityContext';
+import CourseReviewsPage from './pages/courses/CourseReviewsPage';
 
 // Lazy load components
 const LoginPage = React.lazy(() => import('./pages/auth/LoginPage'));
@@ -89,6 +90,7 @@ function App() {
                                 <Route path="/" element={<Home />} />
                                 <Route path="/courses/search" element={<SearchCoursesPage />} />
                                 <Route path="/courses/:id" element={<CourseDetailPage />} />
+                                <Route path="/courses/:courseId" element={<CourseReviewsPage />} />
                                 <Route path="/reviews/submit" element={<SubmitReviewPage />} />
                                 <Route path="/universities" element={<UniversitiesPage />} />
                                 <Route path="/account/settings" element={<AccountSettingsPage />} />
