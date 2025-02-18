@@ -77,9 +77,9 @@ app.get('/api/courses/:id', async (req, res) => {
     const [results] = await pool.query(`
       SELECT 
         c.*,
-        COALESCE(AVG(r.difficulty), 0) as average_difficulty,
-        COALESCE(AVG(r.workload), 0) as average_hours,
-        COALESCE(AVG(r.usefulness), 0) as average_usefulness,
+        CAST(AVG(r.difficulty) AS DECIMAL(10,2)) as average_difficulty,
+        CAST(AVG(r.workload) AS DECIMAL(10,2)) as average_hours,
+        CAST(AVG(r.usefulness) AS DECIMAL(10,2)) as average_usefulness,
         COUNT(r.id) as review_count
       FROM courses c
       LEFT JOIN reviews r ON c.id = r.course_id
@@ -91,15 +91,15 @@ app.get('/api/courses/:id', async (req, res) => {
       return res.status(404).json({ message: 'Course not found' });
     }
 
-    // Convert to numbers and ensure they're not null
+    // Convert numeric strings to numbers
     const course = {
       ...results[0],
-      average_difficulty: Number(results[0].average_difficulty) || 0,
-      average_hours: Number(results[0].average_hours) || 0,
-      average_usefulness: Number(results[0].average_usefulness) || 0
+      average_difficulty: Number(results[0].average_difficulty),
+      average_hours: Number(results[0].average_hours),
+      average_usefulness: Number(results[0].average_usefulness)
     };
 
-    console.log('Processed course data:', course);
+    console.log('Found course:', course);
     res.json(course);
   } catch (error) {
     console.error('Error fetching course:', error);
