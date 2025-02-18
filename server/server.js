@@ -283,12 +283,16 @@ app.post('/api/users/register', async (req, res) => {
                   return res.status(500).json({ error: 'Failed to create user' });
                 }
 
-                // Return user data without password
-                const { password_hash, ...userWithoutPassword } = user;
-                res.status(201).json({
+                // Return same structure as login endpoint
+                const userResponse = {
                   id: results.insertId,
-                  ...userWithoutPassword
-                });
+                  email: user.email,
+                  name: user.name,
+                  role: user.role,
+                  university_id: user.university_id
+                };
+
+                res.status(201).json(userResponse);
               });
             } catch (hashError) {
               console.error('Password hashing error:', hashError);
@@ -389,6 +393,25 @@ app.get('/api/universities', async (req, res) => {
   }
 });
 
+// GET university by ID
+app.get('/api/universities/:id', async (req, res) => {
+  try {
+    const [results] = await connection.promise().query(
+      'SELECT id, name FROM universities WHERE id = ?',
+      [req.params.id]
+    );
+    
+    if (results.length === 0) {
+      return res.status(404).json({ error: 'University not found' });
+    }
+    
+    res.json(results[0]);
+  } catch (error) {
+    console.error('Error fetching university:', error);
+    res.status(500).json({ error: 'Failed to fetch university' });
+  }
+});
+
 // GET all professors
 app.get('/api/professors', async (req, res) => {
   console.log('GET /api/professors - Fetching all professors');
@@ -477,5 +500,20 @@ app.post('/api/reviews', async (req, res) => {
   } catch (error) {
     console.error('Error creating review:', error);
     res.status(500).json({ error: 'Failed to create review' });
+  }
+});
+
+// PUT update user university
+app.put('/api/users/:id/university', async (req, res) => {
+  try {
+    const { universityId } = req.body;
+    await connection.promise().query(
+      'UPDATE users SET university_id = ? WHERE id = ?',
+      [universityId, req.params.id]
+    );
+    res.json({ message: 'University updated successfully' });
+  } catch (error) {
+    console.error('Error updating user university:', error);
+    res.status(500).json({ error: 'Failed to update university' });
   }
 });

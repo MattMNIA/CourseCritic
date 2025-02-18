@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Container, Form, Button, Card, ProgressBar, Alert, Row, Col } from 'react-bootstrap';
 import { FaStar, FaArrowLeft, FaArrowRight, FaBook } from 'react-icons/fa';
 import CourseSearch from '../../components/CourseSearch';
@@ -6,6 +6,7 @@ import ProfessorSearch from '../../components/ProfessorSearch';
 import reviewService from '../../services/reviewService';
 import userService from '../../services/userService';
 import { useNavigate } from 'react-router-dom';
+import { useUniversity } from '../../contexts/UniversityContext';
 
 const SubmitReviewPage = () => {
   const [step, setStep] = useState(1);
@@ -21,6 +22,30 @@ const SubmitReviewPage = () => {
   });
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
+  const { currentUniversity } = useUniversity();
+  const [universityName, setUniversityName] = useState('');
+
+  useEffect(() => {
+    const updateUniversityName = async () => {
+      try {
+        if (currentUniversity) {
+          setUniversityName(currentUniversity.name);
+        } else {
+          const user = userService.getCurrentUser();
+          if (user?.university_id) {
+            const response = await fetch(`/api/universities/${user.university_id}`);
+            if (!response.ok) throw new Error('Failed to fetch university');
+            const data = await response.json();
+            setUniversityName(data.name);
+          }
+        }
+      } catch (error) {
+        console.error('Error updating university name:', error);
+      }
+    };
+
+    updateUniversityName();
+  }, [currentUniversity]); // Only depend on currentUniversity changes
 
   const totalSteps = 7;  // Increased from 5 to 7
   const progress = (step / totalSteps) * 100;
@@ -271,6 +296,16 @@ const SubmitReviewPage = () => {
 
   return (
     <Container className="py-4">
+      {universityName && (
+        <Alert variant="info" className="mb-4">
+          <Alert.Heading as="h5">Writing review for {universityName}</Alert.Heading>
+          <p className="mb-0">
+            You are writing a review for a course at {universityName}. 
+            To review a course from a different university, please select the university from the dropdown menu in the navigation bar.
+          </p>
+        </Alert>
+      )}
+      
       <Card>
         <Card.Body>
           <h2 className="text-center mb-4">Course Review</h2>

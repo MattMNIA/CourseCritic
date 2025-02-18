@@ -1,15 +1,27 @@
-import React from 'react';
-import { Container, Row, Col, Card, Button } from 'react-bootstrap';
+import React, { useState, useEffect } from 'react';
+import { Container, Row, Col, Card, Button, Spinner } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { FaSearch, FaStar, FaUniversity } from 'react-icons/fa';
 
 const Home = () => {
-    const stats = {
-        courses: 150,
-        reviews: 450,
-        universities: 1,
-        students: 200
-    };
+    const [stats, setStats] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const data = await getStats();
+                setStats(data);
+                setLoading(false);
+            } catch (err) {
+                setError(err);
+                setLoading(false);
+            }
+        };
+
+        fetchStats();
+    }, []);
 
     const quickActions = [
         {
@@ -34,6 +46,46 @@ const Home = () => {
             buttonText: "View Universities"
         }
     ];
+
+    const renderStats = () => {
+        if (loading) {
+            return (
+                <div className="text-center py-5">
+                    <Spinner animation="border" variant="primary" />
+                </div>
+            );
+        }
+
+        if (error) {
+            return (
+                <div className="text-center py-5 text-muted">
+                    <p>Unable to load statistics</p>
+                </div>
+            );
+        }
+
+        const statItems = {
+            'Courses Reviewed': stats?.totalCourses || 0,
+            'Student Reviews': stats?.totalReviews || 0,
+            'Universities': stats?.totalUniversities || 0,
+            'Active Students': stats?.activeUsers || 0
+        };
+
+        return (
+            <Row className="text-center g-4">
+                {Object.entries(statItems).map(([label, value]) => (
+                    <Col key={label} md={3} sm={6}>
+                        <div className="stat-card p-4 bg-white rounded-3 shadow-sm h-100">
+                            <h2 className="display-4 text-primary fw-bold mb-2">
+                                {value}
+                            </h2>
+                            <p className="text-muted mb-0 fw-medium">{label}</p>
+                        </div>
+                    </Col>
+                ))}
+            </Row>
+        );
+    };
 
     return (
         <div className="home-page py-5">
@@ -64,29 +116,6 @@ const Home = () => {
                     ))}
                 </Row>
             </Container>
-
-            {/* Statistics */}
-            <div className="stats-section py-5 bg-light">
-                <Container className="py-4">
-                    <Row className="text-center g-4">
-                        {Object.entries({
-                            'Courses Reviewed': stats.courses,
-                            'Student Reviews': stats.reviews,
-                            'Universities': stats.universities,
-                            'Active Students': stats.students
-                        }).map(([label, value]) => (
-                            <Col key={label} md={3} sm={6}>
-                                <div className="stat-card p-4 bg-white rounded-3 shadow-sm h-100">
-                                    <h2 className="display-4 text-primary fw-bold mb-2">
-                                        {value}
-                                    </h2>
-                                    <p className="text-muted mb-0 fw-medium">{label}</p>
-                                </div>
-                            </Col>
-                        ))}
-                    </Row>
-                </Container>
-            </div>
         </div>
     );
 };

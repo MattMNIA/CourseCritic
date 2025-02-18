@@ -161,3 +161,25 @@ h1, h2, h3, h4, h5, h6 {
         font-size: 1.1rem;
     }
 }
+
+/* University Selector Styles */
+#university-selector .dropdown-item {
+  padding: 0.5rem 1rem;
+  white-space: normal;
+}
+
+#university-selector .dropdown-item small {
+  display: block;
+  font-size: 0.875em;
+}
+
+#university-selector .dropdown-menu {
+  margin-top: 0.5rem;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+#university-selector .form-control:focus {
+  box-shadow: none;
+  border-color: var(--bs-primary);
+}
