@@ -11,6 +11,7 @@ import UniversitySelector from './components/UniversitySelector';
 import CourseReviewsPage from './pages/courses/CourseReviewsPage';
 import { UseAuth } from './contexts/AuthContext';
 import { useUniversity } from './contexts/UniversityContext';
+import Footer from './components/Footer';
 
 // Lazy load components
 const LoginPage = React.lazy(() => import('./pages/auth/LoginPage'));
@@ -36,7 +37,7 @@ function App() {
 
     return (
         <Router>
-            <div className="App">
+            <div className="App d-flex flex-column min-vh-100">
                 <Navbar bg="light" expand="lg" className="border-bottom">
                     <Container fluid="lg" className="px-3">
                         <Navbar.Brand as={Link} to="/" className="text-primary fw-bold py-0">CourseCritic</Navbar.Brand>
@@ -88,7 +89,7 @@ function App() {
                     </Container>
                 </Navbar>
 
-                <main className="container-lg px-3 py-3">
+                <main className="container-lg px-3 py-3 flex-grow-1">
                     <Suspense fallback={<div>Loading...</div>}>
                         <Routes>
                             <Route path="/" element={!currentUniversity ? <Navigate to="/select-university" /> : <Home />} />
@@ -108,6 +109,8 @@ function App() {
                         </Routes>
                     </Suspense>
                 </main>
+
+                <Footer />
             </div>
         </Router>
     );

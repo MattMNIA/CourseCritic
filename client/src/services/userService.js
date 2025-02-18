@@ -11,10 +11,27 @@ const userService = {
   },
 
   login: async (credentials) => {
-    const response = await api.post('/users/login', credentials);
-    const user = response.data;
-    userService.setCurrentUser(user);
-    return user;
+    try {
+      const response = await fetch('/api/users/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(credentials)
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Login failed');
+      }
+
+      const data = await response.json();
+      localStorage.setItem('user', JSON.stringify(data));
+      return data;
+    } catch (error) {
+      console.error('Login service error:', error);
+      throw error;
+    }
   },
 
   getCurrentUser: () => {

@@ -20,10 +20,18 @@ const LoginPage = () => {
     setError(null);
 
     try {
+      console.log('Attempting login...');
       const response = await userService.login(formData);
-      login(response); // Use auth context login
-      navigate('/');
+      console.log('Login response:', response);
+      
+      if (response) {
+        login(response);
+        navigate('/');
+      } else {
+        throw new Error('No response from server');
+      }
     } catch (err) {
+      console.error('Login error:', err);
       setError(err?.response?.data?.error || 'Login failed');
     } finally {
       setLoading(false);

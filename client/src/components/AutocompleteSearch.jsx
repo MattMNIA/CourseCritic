@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Form, ListGroup, Button } from 'react-bootstrap';
+import { Form, ListGroup, Button, Nav } from 'react-bootstrap';
 
 const AutocompleteSearch = ({ 
   onSelect, 
@@ -87,14 +87,13 @@ const AutocompleteSearch = ({
             <ListGroup className="position-absolute w-100 mt-1 shadow-sm" style={{ zIndex: 1000 }}>
               {filteredItems.length > 0 ? (
                 filteredItems.map(item => (
-                  <ListGroup.Item 
+                  <Nav.Link
                     key={item.id}
-                    action
+                    className="list-group-item"
                     onClick={() => handleSelect(item)}
-                    className="cursor-pointer"
                   >
                     {renderItem(item)}
-                  </ListGroup.Item>
+                  </Nav.Link>
                 ))
               ) : (
                 <ListGroup.Item disabled>No {label.toLowerCase()} found</ListGroup.Item>

@@ -270,71 +270,56 @@ app.post('/api/users/register', async (req, res) => {
     console.log('Registration attempt:', { email, name, university });
 
     // Check if user exists
-    pool.query(
+    const [existingUsers] = await pool.query(
       'SELECT id FROM users WHERE email = ?',
-      [email],
-      async (error, results) => {
-        if (error) {
-          console.error('Database error checking email:', error);
-          return res.status(500).json({ error: 'Database error' });
-        }
-        
-        if (results.length > 0) {
-          return res.status(400).json({ error: 'Email already registered' });
-        }
-
-        // Check if university exists by ID
-        pool.query(
-          'SELECT id FROM universities WHERE id = ?',
-          [university],
-          async (error, results) => {
-            if (error) {
-              console.error('Database error checking university:', error);
-              return res.status(500).json({ error: 'Database error' });
-            }
-            
-            if (results.length === 0) {
-              return res.status(400).json({ error: 'Invalid university selected' });
-            }
-
-            try {
-              const hashedPassword = await hashPassword(password);
-              const user = {
-                name,
-                email,
-                password_hash: hashedPassword,
-                university_id: university,
-                role: 'user'
-              };
-
-              pool.query('INSERT INTO users SET ?', user, (error, results) => {
-                if (error) {
-                  console.error('Database error creating user:', error);
-                  return res.status(500).json({ error: 'Failed to create user' });
-                }
-
-                // Return same structure as login endpoint
-                const userResponse = {
-                  id: results.insertId,
-                  email: user.email,
-                  name: user.name,
-                  role: user.role,
-                  university_id: user.university_id
-                };
-
-                res.status(201).json(userResponse);
-              });
-            } catch (hashError) {
-              console.error('Password hashing error:', hashError);
-              res.status(500).json({ error: 'Error processing password' });
-            }
-          }
-        );
-      }
+      [email]
     );
+
+    if (existingUsers.length > 0) {
+      return res.status(400).json({ error: 'Email already registered' });
+    }
+
+    // Check if university exists
+    const [universities] = await pool.query(
+      'SELECT id FROM universities WHERE id = ?',
+      [university]
+    );
+
+    if (universities.length === 0) {
+      return res.status(400).json({ error: 'Invalid university selected' });
+    }
+
+    // Hash password and create user
+    const hashedPassword = await hashPassword(password);
+    const user = {
+      name,
+      email,
+      password_hash: hashedPassword,
+      university_id: university,
+      role: 'user'
+    };
+
+    // Insert the new user
+    const [result] = await pool.query('INSERT INTO users SET ?', user);
+    
+    // Return user data without password
+    const userResponse = {
+      id: result.insertId,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      university_id: user.university_id
+    };
+
+    console.log('Registration successful:', userResponse);
+    res.status(201).json(userResponse);
+
   } catch (error) {
-    console.error('Server error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('Registration error:', error);
+    res.status(500).json({ 
+      error: 'Failed to register user',
+      details: error.message 
+    });
   }
 });
 
@@ -342,32 +327,32 @@ app.post('/api/users/register', async (req, res) => {
 app.post('/api/users/login', async (req, res) => {
   try {
     const { email, password } = req.body;
+    console.log('Login attempt for:', email);
 
-    // Find user by email
-    pool.query(
+    // Find user by email using promise-based query
+    const [users] = await pool.query(
       'SELECT id, email, name, password_hash, role, university_id FROM users WHERE email = ?',
-      [email],
-      async (error, results) => {
-        if (error) {
-          return res.status(500).json({ error: 'Database error' });
-        }
-
-        if (results.length === 0) {
-          return res.status(401).json({ error: 'Invalid email or password' });
-        }
-
-        const user = results[0];
-        const validPassword = await bcrypt.compare(password, user.password_hash);
-
-        if (!validPassword) {
-          return res.status(401).json({ error: 'Invalid email or password' });
-        }
-
-        // Don't send password hash back
-        const { password_hash, ...userWithoutPassword } = user;
-        res.json(userWithoutPassword);
-      }
+      [email]
     );
+
+    if (users.length === 0) {
+      console.log('User not found:', email);
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    const user = users[0];
+    const validPassword = await bcrypt.compare(password, user.password_hash);
+
+    if (!validPassword) {
+      console.log('Invalid password for:', email);
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    // Don't send password hash back
+    const { password_hash, ...userWithoutPassword } = user;
+    console.log('Login successful for:', email);
+    res.json(userWithoutPassword);
+
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ error: 'Login failed' });

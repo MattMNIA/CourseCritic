@@ -183,3 +183,16 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: none;
   border-color: var(--bs-primary);
 }
+
+/* Footer Styles */
+footer {
+  margin-top: auto;
+}
+
+footer a:hover {
+  opacity: 0.8;
+}
+
+.min-vh-100 {
+  min-height: 100vh;
+}

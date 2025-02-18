@@ -2,34 +2,46 @@ import { useState, useEffect } from 'react';
 import { Form, Button, Container, Card, Alert } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import userService from '../../services/userService';
-import universityService from '../../services/universityService';
 import { UseAuth } from '../../contexts/AuthContext';
+import AutocompleteSearch from '../../components/AutocompleteSearch';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
   const { login } = UseAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [universities, setUniversities] = useState([]);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     confirmPassword: '',
     name: '',
-    university: ''
+    university: null
   });
 
-  useEffect(() => {
-    const fetchUniversities = async () => {
-      try {
-        const data = await universityService.getAllUniversities();
-        setUniversities(data);
-      } catch (err) {
-        setError('Failed to fetch universities');
-      }
-    };
-    fetchUniversities();
-  }, []);
+  const fetchUniversities = async () => {
+    try {
+      const response = await fetch('/api/universities');
+      return await response.json();
+    } catch (err) {
+      console.error('Failed to fetch universities:', err);
+      return [];
+    }
+  };
+
+  const filterUniversities = (universities, searchTerm) => {
+    return universities.filter(university => 
+      university.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  };
+
+  const renderUniversity = (university) => (
+    <div>
+      <div className="fw-bold">{university.name}</div>
+      <small className="text-muted">
+        {university.course_count} courses • {university.student_count} students
+      </small>
+    </div>
+  );
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -66,7 +78,7 @@ const RegisterPage = () => {
         email: formData.email,
         password: formData.password,
         name: formData.name,
-        university: parseInt(formData.university) // Ensure university is sent as a number
+        university: formData.university.id
       };
 
       console.log('Sending registration data:', { ...userData, password: '[REDACTED]' });
@@ -113,17 +125,16 @@ const RegisterPage = () => {
 
           <Form.Group className="mb-3">
             <Form.Label>University</Form.Label>
-            <Form.Select
-              value={formData.university}
-              onChange={(e) => setFormData({...formData, university: e.target.value})}
-            >
-              <option value="">Select University</option>
-              {universities.map((university) => (
-                <option key={university.id} value={university.id}>
-                  {university.name}
-                </option>
-              ))}
-            </Form.Select>
+            <AutocompleteSearch
+              onSelect={(university) => setFormData({ ...formData, university })}
+              error={error && error.includes('university') ? error : null}
+              placeholder="Search for your university..."
+              fetchItems={fetchUniversities}
+              filterItems={filterUniversities}
+              renderItem={renderUniversity}
+              getDisplayValue={(uni) => uni.name}
+              label="University"
+            />
           </Form.Group>
 
           <Form.Group className="mb-3">

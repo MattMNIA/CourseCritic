@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Spinner } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { FaSearch, FaStar, FaUniversity } from 'react-icons/fa';
+import { FaSearch, FaEdit, FaUniversity } from 'react-icons/fa';
+import { useUniversity } from '../contexts/UniversityContext';
 
 const Home = () => {
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const { currentUniversity } = useUniversity();
 
     useEffect(() => {
         const fetchStats = async () => {
@@ -22,30 +24,6 @@ const Home = () => {
 
         fetchStats();
     }, []);
-
-    const quickActions = [
-        {
-            icon: <FaSearch className="mb-3" size={30} />,
-            title: "Find Courses",
-            description: "Search for courses by name, professor, or difficulty level",
-            link: "/courses/search",
-            buttonText: "Search Courses"
-        },
-        {
-            icon: <FaStar className="mb-3" size={30} />,
-            title: "Write a Review",
-            description: "Share your experience and help other students",
-            link: "/reviews/submit",
-            buttonText: "Add Review"
-        },
-        {
-            icon: <FaUniversity className="mb-3" size={30} />,
-            title: "Browse Universities",
-            description: "Explore courses from different universities",
-            link: "/universities",
-            buttonText: "View Universities"
-        }
-    ];
 
     const renderStats = () => {
         if (loading) {
@@ -93,27 +71,45 @@ const Home = () => {
             <Container className="mb-5">
                 <h2 className="text-center h1 fw-bold mb-5">What would you like to do?</h2>
                 <Row className="g-4">
-                    {quickActions.map((action, index) => (
-                        <Col key={index} md={4}>
-                            <Card className="action-card h-100 border-0 shadow-sm">
-                                <Card.Body className="p-4 text-center">
-                                    <div className="icon-wrapper mb-3">
-                                        {React.cloneElement(action.icon, {
-                                            size: 40,
-                                            className: "text-primary"
-                                        })}
-                                    </div>
-                                    <h3 className="h4 mb-3 fw-bold">{action.title}</h3>
-                                    <p className="text-muted mb-4">{action.description}</p>
-                                    <Link to={action.link}>
-                                        <Button variant="primary" className="fw-semibold px-4">
-                                            {action.buttonText}
-                                        </Button>
-                                    </Link>
+                    {!currentUniversity ? (
+                        <Col xs={12} md={4}>
+                            <Card as={Link} to="/select-university" className="h-100 text-decoration-none hover-shadow">
+                                <Card.Body className="text-center py-5">
+                                    <FaUniversity className="display-1 mb-4 text-primary" />
+                                    <Card.Title>Select Your University</Card.Title>
+                                    <Card.Text className="text-muted">
+                                        Choose your university to start exploring courses and reviews
+                                    </Card.Text>
                                 </Card.Body>
                             </Card>
                         </Col>
-                    ))}
+                    ) : (
+                        <>
+                            <Col xs={12} md={6}>
+                                <Card as={Link} to="/courses/search" className="h-100 text-decoration-none hover-shadow">
+                                    <Card.Body className="text-center py-5">
+                                        <FaSearch className="display-1 mb-4 text-primary" />
+                                        <Card.Title>Find Courses</Card.Title>
+                                        <Card.Text className="text-muted">
+                                            Search and explore course reviews from your peers
+                                        </Card.Text>
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+
+                            <Col xs={12} md={6}>
+                                <Card as={Link} to="/reviews/submit" className="h-100 text-decoration-none hover-shadow">
+                                    <Card.Body className="text-center py-5">
+                                        <FaEdit className="display-1 mb-4 text-primary" />
+                                        <Card.Title>Write a Review</Card.Title>
+                                        <Card.Text className="text-muted">
+                                            Share your experience with a course
+                                        </Card.Text>
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                        </>
+                    )}
                 </Row>
             </Container>
         </div>
