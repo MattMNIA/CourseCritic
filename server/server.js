@@ -152,9 +152,9 @@ app.get('/api/search/courses', async (req, res) => {
     let query = `
       SELECT 
         c.*,
-        AVG(r.difficulty) as difficulty,
-        AVG(r.workload) as workload,
-        AVG(r.usefulness) as usefulness,
+        CAST(AVG(r.difficulty) AS DECIMAL(10,2)) as difficulty,
+        CAST(AVG(r.workload) AS DECIMAL(10,2)) as workload,
+        CAST(AVG(r.usefulness) AS DECIMAL(10,2)) as usefulness,
         COUNT(DISTINCT r.id) as review_count
       FROM courses c
       LEFT JOIN reviews r ON c.id = r.course_id
@@ -186,8 +186,17 @@ app.get('/api/search/courses', async (req, res) => {
 
     const [results] = await pool.query(query, params);
     
+    // Convert string values to numbers
+    const processedResults = results.map(course => ({
+      ...course,
+      difficulty: course.difficulty ? Number(course.difficulty) : null,
+      workload: course.workload ? Number(course.workload) : null,
+      usefulness: course.usefulness ? Number(course.usefulness) : null,
+      review_count: Number(course.review_count)
+    }));
+    
     console.log(`Found ${results.length} courses matching criteria`);
-    res.json(results);
+    res.json(processedResults);
   } catch (error) {
     console.error('Error searching courses:', error);
     res.status(500).json({ error: 'Failed to search courses' });

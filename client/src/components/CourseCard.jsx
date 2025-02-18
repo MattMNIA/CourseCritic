@@ -9,6 +9,11 @@ const CourseCard = ({ course }) => {
     navigate(`/courses/${course.id}/reviews`);
   };
 
+  // Ensure values are numbers
+  const difficulty = typeof course.difficulty === 'string' ? parseFloat(course.difficulty) : course.difficulty;
+  const workload = typeof course.workload === 'string' ? parseFloat(course.workload) : course.workload;
+  const usefulness = typeof course.usefulness === 'string' ? parseFloat(course.usefulness) : course.usefulness;
+
   return (
     <Card 
       className="h-100 cursor-pointer hover-shadow"
@@ -24,15 +29,15 @@ const CourseCard = ({ course }) => {
         <div className="d-flex justify-content-between text-muted mt-3">
           <div>
             <FaBook className="me-1" />
-            {course.difficulty ? `${course.difficulty}/5` : 'No ratings'}
+            {difficulty ? `${difficulty.toFixed(1)}/5` : 'No ratings'}
           </div>
           <div>
             <FaClock className="me-1" />
-            {course.workload ? `${course.workload}h/week` : 'N/A'}
+            {workload ? `${workload.toFixed(1)}h/week` : 'N/A'}
           </div>
           <div>
             <FaStar className="me-1" />
-            {course.usefulness ? `${course.usefulness}/5` : 'No ratings'}
+            {usefulness ? `${usefulness.toFixed(1)}/5` : 'No ratings'}
           </div>
         </div>
       </Card.Body>
