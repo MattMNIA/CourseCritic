@@ -525,8 +525,8 @@ app.post('/api/professors', async (req, res) => {
 });
 
 // POST new review
-app.post('/api/reviews', async (req, res) => {
-  console.log('POST /api/reviews - Creating new review:', req.body);
+app.post('/api/review', async (req, res) => {
+  console.log('POST /api/review - Creating new review:', req.body);
   try {
     let course_id = req.body.courseId;
     if (!req.body.courseId || !Number.isInteger(parseInt(req.body.courseId))) {

@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Container, Card, Row, Col, Alert } from 'react-bootstrap';
 import { FaStar, FaBook } from 'react-icons/fa';
+import AdUnit from '../../components/AdUnit';
+import AdPlaceholder from '../../components/AdPlaceholder';
 
 const CourseReviewsPage = () => {
   const { courseId } = useParams();
@@ -98,43 +100,48 @@ const CourseReviewsPage = () => {
         </Card.Body>
       </Card>
 
+      {/* <AdPlaceholder /> Comment out ads temporarily */}
+
       <h3 className="mb-4">Reviews ({reviews.length})</h3>
       {console.log(reviews)}
-      {reviews.map(review => (
-        <Card key={review.id} className="mb-3">
-          <Card.Body>
-            <Row>
-              <Col md={3}>
-                <div className="mb-3">
-                  <strong>Difficulty:</strong> {review.difficulty}/5
-                </div>
-                <div className="mb-3">
-                  <strong>Hours/Week:</strong> {review.workload}
-                </div>
-                <div className="mb-3">
-                  <strong>Usefulness:</strong> {review.usefulness}/5
-                </div>
-                <div className="text-muted">
-                  {new Date(review.created_at).toLocaleDateString()}
-                </div>
-              </Col>
-              <Col md={9}>
-                {review.course_comments && (
+      {reviews.map((review, index) => (
+        <>
+          <Card key={review.id} className="mb-3">
+            <Card.Body>
+              <Row>
+                <Col md={3}>
                   <div className="mb-3">
-                    <h5>Course Comments:</h5>
-                    <p>{review.course_comments}</p>
+                    <strong>Difficulty:</strong> {review.difficulty}/5
                   </div>
-                )}
-                {review.comments && (
-                  <div>
-                    <h5>Additional Comments:</h5>
-                    <p>{review.comments}</p>
+                  <div className="mb-3">
+                    <strong>Hours/Week:</strong> {review.workload}
                   </div>
-                )}
-              </Col>
-            </Row>
-          </Card.Body>
-        </Card>
+                  <div className="mb-3">
+                    <strong>Usefulness:</strong> {review.usefulness}/5
+                  </div>
+                  <div className="text-muted">
+                    {new Date(review.created_at).toLocaleDateString()}
+                  </div>
+                </Col>
+                <Col md={9}>
+                  {review.course_comments && (
+                    <div className="mb-3">
+                      <h5>Course Comments:</h5>
+                      <p>{review.course_comments}</p>
+                    </div>
+                  )}
+                  {review.comments && (
+                    <div>
+                      <h5>Additional Comments:</h5>
+                      <p>{review.comments}</p>
+                    </div>
+                  )}
+                </Col>
+              </Row>
+            </Card.Body>
+          </Card>
+          {index % 5 === 4 && <AdUnit slot="0987654321" />}
+        </>
       ))}
 
       {reviews.length === 0 && (
