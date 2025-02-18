@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { Form, Button, Container, Card, Alert } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import userService from '../../services/userService';
+import { UseAuth } from '../../contexts/AuthContext';
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const { login } = UseAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -19,7 +21,7 @@ const LoginPage = () => {
 
     try {
       const response = await userService.login(formData);
-      userService.setCurrentUser(response);
+      login(response); // Use auth context login
       navigate('/');
     } catch (err) {
       setError(err?.response?.data?.error || 'Login failed');

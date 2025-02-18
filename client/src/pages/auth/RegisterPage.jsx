@@ -3,9 +3,11 @@ import { Form, Button, Container, Card, Alert } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import userService from '../../services/userService';
 import universityService from '../../services/universityService';
+import { UseAuth } from '../../contexts/AuthContext';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
+  const { login } = UseAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [universities, setUniversities] = useState([]);
@@ -72,7 +74,7 @@ const RegisterPage = () => {
       const response = await userService.register(userData);
       console.log('Registration response:', response);
       
-      userService.setCurrentUser(response);
+      login(response); // Use auth context login
       navigate('/');
     } catch (err) {
       console.error('Registration error:', err);

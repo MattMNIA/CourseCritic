@@ -3,7 +3,18 @@ const mysql = require('mysql2');
 const cors = require("cors");
 const bcrypt = require('bcrypt');
 
-// Next initialize the application
+// Create MySQL connection pool instead of single connection
+const pool = mysql.createPool({
+  host: "157.230.188.42",
+  user: "admin",
+  password: "admin_password",
+  database: "coursecritic",
+  port: 3306,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+}).promise(); // Convert to promise-based pool
+
 const app = express();
 
 // Update CORS configuration
@@ -28,36 +39,19 @@ app.get('/api/health', (req, res) => {
   res.status(200).send('healthy');
 });
 
-// Create MySQL connection
-const connection = mysql.createConnection({
-  host: "157.230.188.42",   // Use VM IP from .env or docker-compose
-  user: "admin",
-  password: "admin_password",
-  database: "coursecritic",
-  port: 3306,
-});
-
 // Start the server first, then connect to DB
 const startServer = async () => {
-  const server = app.listen(process.env.PORT || 8001, () => {
-    console.log('Server started on port', process.env.PORT || 8001);
-  });
-
   try {
-    await new Promise((resolve, reject) => {
-      connection.connect(error => {
-        if (error) {
-          console.error('Error connecting to MySQL:', error.stack);
-          reject(error);
-        } else {
-          console.log('Connected to MySQL as id', connection.threadId);
-          resolve();
-        }
-      });
+    // Test the pool with a simple query
+    await pool.query('SELECT 1');
+    console.log('Database pool initialized successfully');
+    
+    app.listen(process.env.PORT || 8001, () => {
+      console.log('Server started on port', process.env.PORT || 8001);
     });
   } catch (error) {
-    console.error('Failed to connect to database:', error);
-    // Don't exit process, let server keep running
+    console.error('Failed to initialize database pool:', error);
+    process.exit(1);
   }
 };
 
@@ -66,7 +60,7 @@ startServer();
 // GET all courses
 app.get('/api/courses', (req, res) => {
   console.log('GET /api/courses - Fetching all courses');
-  connection.query('SELECT * FROM courses', (error, results) => {
+  pool.query('SELECT * FROM courses', (error, results) => {
     if (error) {
       console.error('Error fetching courses:', error);
       return res.status(500).json({ error: error.message });
@@ -79,7 +73,7 @@ app.get('/api/courses', (req, res) => {
 // GET course by ID
 app.get('/api/courses/:id', (req, res) => {
   console.log(`GET /api/courses/${req.params.id} - Fetching course by ID`);
-  connection.query(
+  pool.query(
     'SELECT * FROM courses WHERE id = ?',
     [req.params.id],
     (error, results) => {
@@ -98,7 +92,7 @@ app.get('/api/courses/:id', (req, res) => {
 app.get('/api/courses/university/:universityId', async (req, res) => {
   console.log(`GET /api/courses/university/${req.params.universityId} - Fetching courses by university`);
   try {
-    const [results] = await connection.promise().query(
+    const [results] = await pool.query(
       'SELECT * FROM courses WHERE university_id = ?',
       [req.params.universityId]
     );
@@ -154,7 +148,7 @@ app.get('/api/search/courses', async (req, res) => {
 
     query += ' GROUP BY c.id';
 
-    const [results] = await connection.promise().query(query, params);
+    const [results] = await pool.query(query, params);
     
     console.log(`Found ${results.length} courses matching criteria`);
     res.json(results);
@@ -173,7 +167,7 @@ app.post('/api/courses', (req, res) => {
     university_id: course_code
   };
 
-  connection.query('INSERT INTO courses SET ?', course, (error, results) => {
+  pool.query('INSERT INTO courses SET ?', course, (error, results) => {
     if (error) {
       console.error('Error creating course:', error);
       return res.status(500).json({ error: error.message });
@@ -195,7 +189,7 @@ app.put('/api/courses/:id', (req, res) => {
     test_coursescol: req.body.test_coursescol
   };
 
-  connection.query(
+  pool.query(
     'UPDATE test_courses SET ? WHERE idtest_courses = ?',
     [course, req.params.id],
     (error, results) => {
@@ -213,7 +207,7 @@ app.put('/api/courses/:id', (req, res) => {
 // DELETE course
 app.delete('/api/courses/:id', (req, res) => {
   console.log(`DELETE /api/courses/${req.params.id} - Deleting course`);
-  connection.query(
+  pool.query(
     'DELETE FROM test_courses WHERE idtest_courses = ?',
     [req.params.id],
     (error, results) => {
@@ -240,7 +234,7 @@ app.post('/api/users/register', async (req, res) => {
     console.log('Registration attempt:', { email, name, university });
 
     // Check if user exists
-    connection.query(
+    pool.query(
       'SELECT id FROM users WHERE email = ?',
       [email],
       async (error, results) => {
@@ -254,7 +248,7 @@ app.post('/api/users/register', async (req, res) => {
         }
 
         // Check if university exists by ID
-        connection.query(
+        pool.query(
           'SELECT id FROM universities WHERE id = ?',
           [university],
           async (error, results) => {
@@ -277,7 +271,7 @@ app.post('/api/users/register', async (req, res) => {
                 role: 'user'
               };
 
-              connection.query('INSERT INTO users SET ?', user, (error, results) => {
+              pool.query('INSERT INTO users SET ?', user, (error, results) => {
                 if (error) {
                   console.error('Database error creating user:', error);
                   return res.status(500).json({ error: 'Failed to create user' });
@@ -314,7 +308,7 @@ app.post('/api/users/login', async (req, res) => {
     const { email, password } = req.body;
 
     // Find user by email
-    connection.query(
+    pool.query(
       'SELECT id, email, name, password_hash, role, university_id FROM users WHERE email = ?',
       [email],
       async (error, results) => {
@@ -362,7 +356,7 @@ const hashPassword = async (password) => {
 app.get('/api/universities', async (req, res) => {
   console.log('GET /api/universities - Fetching all universities with stats');
   try {
-    const [results] = await connection.promise().query(`
+    const [results] = await pool.query(`
       SELECT 
         u.id,
         u.name,
@@ -393,10 +387,49 @@ app.get('/api/universities', async (req, res) => {
   }
 });
 
+// Add this endpoint before your other routes
+app.get('/api/universities/search', async (req, res) => {
+  try {
+    const { q = '', page = 1, limit = 24 } = req.query;
+    const offset = (page - 1) * limit;
+    
+    // First get total count for pagination
+    const [countResult] = await pool.query(
+      `SELECT COUNT(*) as total 
+       FROM universities 
+       WHERE name LIKE ?`,
+      [`%${q}%`]
+    );
+    
+    const total = countResult[0].total;
+
+    // Then get paginated results
+    const [universities] = await pool.query(
+      `SELECT id, name, 
+        (SELECT COUNT(*) FROM courses WHERE university_id = universities.id) as course_count,
+        (SELECT COUNT(*) FROM users WHERE university_id = universities.id) as student_count
+       FROM universities 
+       WHERE name LIKE ? 
+       ORDER BY name ASC
+       LIMIT ? OFFSET ?`,
+      [`%${q}%`, parseInt(limit), parseInt(offset)]
+    );
+
+    res.json({
+      universities,
+      hasMore: offset + universities.length < total
+    });
+
+  } catch (error) {
+    console.error('Error searching universities:', error);
+    res.status(500).json({ error: 'Failed to search universities' });
+  }
+});
+
 // GET university by ID
 app.get('/api/universities/:id', async (req, res) => {
   try {
-    const [results] = await connection.promise().query(
+    const [results] = await pool.query(
       'SELECT id, name FROM universities WHERE id = ?',
       [req.params.id]
     );
@@ -416,7 +449,7 @@ app.get('/api/universities/:id', async (req, res) => {
 app.get('/api/professors', async (req, res) => {
   console.log('GET /api/professors - Fetching all professors');
   try {
-    const [results] = await connection.promise().query(
+    const [results] = await pool.query(
       'SELECT DISTINCT professor as name, id FROM courses WHERE professor IS NOT NULL'
     );
     
@@ -432,7 +465,7 @@ app.get('/api/professors', async (req, res) => {
 app.get('/api/professors/university/:universityId', async (req, res) => {
   console.log(`GET /api/professors/university/${req.params.universityId} - Fetching professors by university`);
   try {
-    const [results] = await connection.promise().query(
+    const [results] = await pool.query(
       'SELECT id, name FROM professors WHERE university_id = ?',
       [req.params.universityId]
     );
@@ -454,7 +487,7 @@ app.post('/api/professors', async (req, res) => {
       university_id: req.body.universityId
     };
 
-    const [result] = await connection.promise().query(
+    const [result] = await pool.query(
       'INSERT INTO professors SET ?',
       professor
     );
@@ -490,7 +523,7 @@ app.post('/api/reviews', async (req, res) => {
       created_at: new Date()
     };
 
-    const [result] = await connection.promise().query(
+    const [result] = await pool.query(
       'INSERT INTO reviews SET ?',
       review
     );
@@ -507,7 +540,7 @@ app.post('/api/reviews', async (req, res) => {
 app.put('/api/users/:id/university', async (req, res) => {
   try {
     const { universityId } = req.body;
-    await connection.promise().query(
+    await pool.query(
       'UPDATE users SET university_id = ? WHERE id = ?',
       [universityId, req.params.id]
     );

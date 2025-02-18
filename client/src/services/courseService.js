@@ -110,7 +110,7 @@ const courseService = {
    */
   searchCourses: async ({ universityId, courseId, professorId }) => {
     try {
-      let url = '/api/courses/search';
+      let url = '/api/search/courses';
       const params = new URLSearchParams();
       
       if (universityId) params.append('university_id', universityId);

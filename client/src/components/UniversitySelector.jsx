@@ -64,15 +64,15 @@ const UniversitySelector = () => {
           <div style={{ 
             display: 'inline-flex', 
             alignItems: 'center',
-            gap: '4px'
+            gap: '4px',
+            maxWidth: '150px'  // Reduced from 200px
           }}>
             <span style={{ 
-              maxWidth: '200px', 
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
               display: 'block',
-              lineHeight: '1.5'
+              width: '100%'
             }}>
               {selectedUniversity ? selectedUniversity.name : "Select University"}
             </span>
@@ -80,11 +80,11 @@ const UniversitySelector = () => {
         }
         id="university-selector"
         className="me-2 d-inline-flex align-items-center"
-        style={{ whiteSpace: 'nowrap' }}
+        style={{ maxWidth: '180px' }}  // Reduced from 250px
         show={isOpen}
         onToggle={(isOpen) => setIsOpen(isOpen)}
       >
-        <div className="px-3 py-2" style={{ minWidth: '300px' }}>
+        <div className="px-3 py-2" style={{ minWidth: '250px', maxWidth: '500px' }}>  // Reduced from 300px
           <Form.Control
             type="text"
             placeholder="Search universities..."
