@@ -33,8 +33,10 @@ const CourseReviewsPage = () => {
           reviewsRes.json()
         ]);
 
-        console.log('Course data:', courseData);
-        console.log('Reviews data:', reviewsData);
+        // Add debugging for the course data
+        console.log('Raw course data:', courseData);
+        console.log('Average hours:', courseData.average_hours);
+        console.log('Type of average_hours:', typeof courseData.average_hours);
 
         setCourse(courseData);
         setReviews(reviewsData);
@@ -52,7 +54,8 @@ const CourseReviewsPage = () => {
   if (loading) return <div>Loading...</div>;
   if (error) return <Alert variant="danger">{error}</Alert>;
   if (!course) return <Alert variant="warning">Course not found</Alert>;
-
+  console.log(course)
+  console.log(course.average_hours)
   return (
     <Container className="py-4">
       <Card className="mb-4">
@@ -65,7 +68,7 @@ const CourseReviewsPage = () => {
               <div className="text-center">
                 <h4>Average Difficulty</h4>
                 <div className="display-4">
-                {(course.average_difficulty != null) ? course.average_difficulty.toFixed(1) : 'N/A'}
+                  {(course.average_difficulty != null) ? course.average_difficulty.toFixed(1) : 'N/A'}
                 </div>
                 <div className="mt-2">
                   <FaBook color="#dc3545" size={24} />
@@ -76,7 +79,7 @@ const CourseReviewsPage = () => {
               <div className="text-center">
                 <h4>Average Hours/Week</h4>
                 <div className="display-4">
-                {(course.average_hours != null) ? course.average_hours.toFixed(1) : 'N/A'}
+                  {(course.average_hours != null) ? course.average_hours.toFixed(1) : 'N/A'}
                 </div>
               </div>
             </Col>
@@ -96,7 +99,7 @@ const CourseReviewsPage = () => {
       </Card>
 
       <h3 className="mb-4">Reviews ({reviews.length})</h3>
-      
+      {console.log(reviews)}
       {reviews.map(review => (
         <Card key={review.id} className="mb-3">
           <Card.Body>
@@ -106,7 +109,7 @@ const CourseReviewsPage = () => {
                   <strong>Difficulty:</strong> {review.difficulty}/5
                 </div>
                 <div className="mb-3">
-                  <strong>Hours/Week:</strong> {review.hours_per_week}
+                  <strong>Hours/Week:</strong> {review.workload}
                 </div>
                 <div className="mb-3">
                   <strong>Usefulness:</strong> {review.usefulness}/5
