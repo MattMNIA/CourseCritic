@@ -46,7 +46,6 @@ function App() {
                                 <Nav.Link as={Link} to="/" className="text-primary">Home</Nav.Link>
                                 <Nav.Link as={Link} to="/courses/search" className="text-primary">Find Courses</Nav.Link>
                                 <Nav.Link as={Link} to="/reviews/submit" className="text-primary">Write Review</Nav.Link>
-                                <Nav.Link as={Link} to="/universities" className="text-primary">Universities</Nav.Link>
                             </Nav>
                             <Nav>
                                 {currentUniversity && (
@@ -96,7 +95,7 @@ function App() {
                             <Route path="/select-university" element={<UniversitySelectionPage />} />
                             <Route path="/courses/search" element={<SearchCoursesPage />} />
                             <Route path="/courses/:id" element={<CourseDetailPage />} />
-                            <Route path="/courses/:courseId" element={<CourseReviewsPage />} />
+                            <Route path="/courses/:courseId/reviews" element={<CourseReviewsPage />} />
                             <Route path="/reviews/submit" element={<SubmitReviewPage />} />
                             <Route path="/universities" element={<UniversitiesPage />} />
                             {/* <Route path="/account/settings" element={<AccountSettingsPage />} /> */}

@@ -13,21 +13,33 @@ const CourseReviewsPage = () => {
   useEffect(() => {
     const fetchCourseAndReviews = async () => {
       try {
+        console.log('Fetching data for course:', courseId);
         const [courseRes, reviewsRes] = await Promise.all([
-          fetch(`/api/course/${courseId}`),            // Updated endpoint
-          fetch(`/api/course/${courseId}/reviews`)     // Updated endpoint
+          fetch(`/api/courses/${courseId}`), // Changed from /api/course to /api/courses
+          fetch(`/api/course/${courseId}/reviews`)
         ]);
 
-        if (!courseRes.ok || !reviewsRes.ok) throw new Error('Failed to fetch data');
+        console.log('Course response:', courseRes);
+        console.log('Reviews response:', reviewsRes);
+
+        if (!courseRes.ok || !reviewsRes.ok) {
+          console.error('Course response:', await courseRes.text());
+          console.error('Reviews response:', await reviewsRes.text());
+          throw new Error('Failed to fetch data');
+        }
 
         const [courseData, reviewsData] = await Promise.all([
           courseRes.json(),
           reviewsRes.json()
         ]);
 
+        console.log('Course data:', courseData);
+        console.log('Reviews data:', reviewsData);
+
         setCourse(courseData);
         setReviews(reviewsData);
       } catch (err) {
+        console.error('Error fetching data:', err);
         setError('Failed to load course reviews');
       } finally {
         setLoading(false);
@@ -53,7 +65,7 @@ const CourseReviewsPage = () => {
               <div className="text-center">
                 <h4>Average Difficulty</h4>
                 <div className="display-4">
-                  {course.average_difficulty?.toFixed(1) || 'N/A'}
+                {(course.average_difficulty != null) ? course.average_difficulty.toFixed(1) : 'N/A'}
                 </div>
                 <div className="mt-2">
                   <FaBook color="#dc3545" size={24} />
@@ -64,7 +76,7 @@ const CourseReviewsPage = () => {
               <div className="text-center">
                 <h4>Average Hours/Week</h4>
                 <div className="display-4">
-                  {course.average_hours?.toFixed(1) || 'N/A'}
+                {(course.average_hours != null) ? course.average_hours.toFixed(1) : 'N/A'}
                 </div>
               </div>
             </Col>
@@ -72,7 +84,7 @@ const CourseReviewsPage = () => {
               <div className="text-center">
                 <h4>Average Usefulness</h4>
                 <div className="display-4">
-                  {course.average_usefulness?.toFixed(1) || 'N/A'}
+                  {(course.average_usefulness != null) ? course.average_usefulness.toFixed(1) : 'N/A'}
                 </div>
                 <div className="mt-2">
                   <FaStar color="#ffc107" size={24} />

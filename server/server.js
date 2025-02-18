@@ -71,8 +71,44 @@ app.get('/api/courses', (req, res) => {
 });
 
 // GET course by ID
-app.get('/api/courses/:id', (req, res) => {
+app.get('/api/courses/:id', async (req, res) => {
   console.log(`GET /api/courses/${req.params.id} - Fetching course by ID`);
+  try {
+    const [results] = await pool.query(`
+      SELECT 
+        c.*,
+        CAST(AVG(r.difficulty) AS DECIMAL(10,2)) as average_difficulty,
+        CAST(AVG(r.workload) AS DECIMAL(10,2)) as average_hours,
+        CAST(AVG(r.usefulness) AS DECIMAL(10,2)) as average_usefulness,
+        COUNT(r.id) as review_count
+      FROM courses c
+      LEFT JOIN reviews r ON c.id = r.course_id
+      WHERE c.id = ?
+      GROUP BY c.id
+    `, [req.params.id]);
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: 'Course not found' });
+    }
+
+    // Convert numeric strings to numbers
+    const course = {
+      ...results[0],
+      average_difficulty: Number(results[0].average_difficulty),
+      average_hours: Number(results[0].average_hours),
+      average_usefulness: Number(results[0].average_usefulness)
+    };
+
+    console.log('Found course:', course);
+    res.json(course);
+  } catch (error) {
+    console.error('Error fetching course:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/course/:id', (req, res) => {
+  console.log(`GET /api/course/${req.params.id} - Fetching course by ID`);
   pool.query(
     'SELECT * FROM courses WHERE id = ?',
     [req.params.id],
@@ -548,5 +584,29 @@ app.put('/api/users/:id/university', async (req, res) => {
   } catch (error) {
     console.error('Error updating user university:', error);
     res.status(500).json({ error: 'Failed to update university' });
+  }
+});
+
+// Add this new endpoint with the other routes
+app.get('/api/course/:courseId/reviews', async (req, res) => {
+  console.log(`GET /api/course/${req.params.courseId}/reviews - Fetching reviews for course`);
+  try {
+    const [results] = await pool.query(`
+      SELECT 
+        r.*,
+        u.name as user_name,
+        p.name as professor_name
+      FROM reviews r
+      LEFT JOIN users u ON r.user_id = u.id
+      LEFT JOIN professors p ON r.professor_id = p.id
+      WHERE r.course_id = ?
+      ORDER BY r.created_at DESC
+    `, [req.params.courseId]);
+    
+    console.log(`Found ${results.length} reviews for course ${req.params.courseId}`);
+    res.json(results);
+  } catch (error) {
+    console.error('Error fetching course reviews:', error);
+    res.status(500).json({ error: 'Failed to fetch reviews' });
   }
 });
