@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Container, Card, Row, Col, Alert } from 'react-bootstrap';
-import { FaStar, FaBook } from 'react-icons/fa';
+import { FaStar, FaBook, FaClock } from 'react-icons/fa';
 import AdUnit from '../../components/AdUnit';
 import AdPlaceholder from '../../components/AdPlaceholder';
 
@@ -82,6 +82,9 @@ const CourseReviewsPage = () => {
                 <h4>Average Hours/Week</h4>
                 <div className="display-4">
                   {(course.average_hours != null) ? course.average_hours.toFixed(1) : 'N/A'}
+                </div>
+                <div className="mt-2">
+                  <FaClock color="#6c757d" size={24} />
                 </div>
               </div>
             </Col>
